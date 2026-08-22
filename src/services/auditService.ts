@@ -1,4 +1,5 @@
 import {
+  BRANCHES,
   auditLogs,
   branchRisk,
   evidenceDocuments,
@@ -76,51 +77,48 @@ export function getAnalytics() {
   };
 }
 
-/** @deprecated Use computeKpis from @/lib/dashboardUtils with live store data instead. */
-export const kpis = [
-  {
-    id: "reports",
-    label: "Total Reports",
-    value: String(reports.length),
-    subtitle: "Derived from report register",
-    icon: "FileText",
-    tone: "navy" as const,
-    href: "/reports",
-  },
-  {
-    id: "findings",
-    label: "Active Findings",
-    value: String(
-      findings.filter((f) => f.status !== "Resolved" && f.status !== "Dismissed").length,
-    ),
-    subtitle: "Derived from findings register",
-    icon: "AlertTriangle",
-    tone: "high" as const,
-    href: "/findings",
-  },
-  {
-    id: "critical",
-    label: "Critical Risks",
-    value: String(
-      findings.filter(
-        (f) => f.risk === "Critical" && f.status !== "Resolved" && f.status !== "Dismissed",
-      ).length,
-    ),
-    subtitle: "Open critical findings",
-    icon: "ShieldAlert",
-    tone: "critical" as const,
-    href: "/findings?risk=Critical",
-  },
-  {
-    id: "coverage",
-    label: "Audit Coverage",
-    value: `${Math.round((new Set(reports.map((r) => r.branchCode)).size / 8) * 100)}%`,
-    subtitle: "Branch coverage from reports",
-    icon: "Target",
-    tone: "teal" as const,
-    href: "/audit-intelligence",
-  },
-];
+export interface DashboardKpiSummary {
+  totalReports: number;
+  activeFindings: number;
+  criticalRisks: number;
+  auditCoverage: {
+    percentage: number;
+    branchesCovered: number;
+    totalBranches: number;
+  };
+}
+
+export function computeAuditCoverage(reportsData: BankReport[]): {
+  percentage: number;
+  branchesCovered: number;
+  totalBranches: number;
+} {
+  const branchesCovered = new Set(reportsData.map((r) => r.branchCode)).size;
+  const totalBranches = BRANCHES.length;
+  const percentage = totalBranches > 0 ? Math.round((branchesCovered / totalBranches) * 100) : 0;
+  return { percentage, branchesCovered, totalBranches };
+}
+
+export function computeDashboardKpis(
+  reportsData: BankReport[] = reports,
+  findingsData: Finding[] = findings,
+): DashboardKpiSummary {
+  const totalReports = reportsData.length;
+  const activeFindings = findingsData.filter(
+    (f) => f.status !== "Resolved" && f.status !== "Dismissed",
+  ).length;
+  const criticalRisks = findingsData.filter(
+    (f) => f.risk === "Critical" && f.status !== "Resolved" && f.status !== "Dismissed",
+  ).length;
+  const auditCoverage = computeAuditCoverage(reportsData);
+
+  return {
+    totalReports,
+    activeFindings,
+    criticalRisks,
+    auditCoverage,
+  };
+}
 
 export const dashboardInsight =
   "Overall risk increased 14% this week, primarily driven by transaction anomalies in Corporate Lending and two branch-level reporting mismatches.";

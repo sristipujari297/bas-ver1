@@ -64,10 +64,7 @@ function Overview() {
     [reports, branch, sector, range],
   );
 
-  const kpis = useMemo(
-    () => computeKpis(filteredReports, filteredFindings),
-    [filteredReports, filteredFindings],
-  );
+  const kpis = useMemo(() => computeKpis(reports, findings), [reports, findings]);
 
   const riskTrendData = useMemo(
     () => computeFilteredRiskTrend(filteredFindings),

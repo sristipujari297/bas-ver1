@@ -76,15 +76,17 @@ export function isActiveFinding(f: Finding): boolean {
 export function computeAuditCoverage(reports: BankReport[]): {
   percentage: number;
   branchesCovered: number;
+  totalBranches: number;
 } {
   const branchesCovered = new Set(reports.map((r) => r.branchCode)).size;
-  const percentage = Math.round((branchesCovered / BRANCHES.length) * 100);
-  return { percentage, branchesCovered };
+  const totalBranches = BRANCHES.length;
+  const percentage = totalBranches > 0 ? Math.round((branchesCovered / totalBranches) * 100) : 0;
+  return { percentage, branchesCovered, totalBranches };
 }
 
 export function computeKpis(reports: BankReport[], findings: Finding[]) {
   const active = findings.filter(isActiveFinding);
-  const critical = active.filter((f) => f.risk === "Critical");
+  const critical = findings.filter((f) => f.risk === "Critical");
   const coverage = computeAuditCoverage(reports);
   const immediate = active.filter((f) => f.risk === "Critical" || f.risk === "High").length;
 
@@ -123,7 +125,7 @@ export function computeKpis(reports: BankReport[], findings: Finding[]) {
       id: "coverage",
       label: "Audit Coverage",
       value: `${coverage.percentage}%`,
-      subtitle: `Across ${coverage.branchesCovered} of ${BRANCHES.length} branches`,
+      subtitle: `Across ${coverage.branchesCovered} of ${coverage.totalBranches} branches`,
       icon: "Target" as const,
       tone: "teal" as const,
       href: "/audit-intelligence",
