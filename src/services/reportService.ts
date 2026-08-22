@@ -387,6 +387,31 @@ export function generateEvidenceFromReport(
   return { evidence, document };
 }
 
+/** Generate a realistic mock remediation action linked to a finding. */
+export function generateRemediationFromFinding(finding: Finding): RemediationAction {
+  const ts = Date.now();
+  const rmId = `rm-${ts}`;
+
+  const action =
+    finding.recommendations[0] ??
+    `Review and remediate ${finding.type.toLowerCase()} per internal audit guidelines`;
+
+  const priority: "P1" | "P2" | "P3" =
+    finding.risk === "Critical" ? "P1" : finding.risk === "High" ? "P2" : "P3";
+
+  return {
+    id: rmId,
+    action,
+    findingId: finding.id,
+    findingRef: finding.ref,
+    risk: finding.risk,
+    owner: finding.owner && finding.owner !== "Unassigned" ? finding.owner : "Unassigned",
+    dueDate: "29 Aug 2026",
+    status: "Not Started",
+    priority,
+  };
+}
+
 export interface ReportAnalysisResult {
   finding: Finding;
   evidenceRefs: EvidenceRef[];
@@ -404,19 +429,7 @@ export function generateAnalysisFromReport(
   const ts = Date.now();
   const finding = generateFindingFromReport(report, existingFindingCount);
   const { evidence, document } = generateEvidenceFromReport(report, finding);
-  const rmId = `rm-${ts}`;
-
-  const remediation: RemediationAction = {
-    id: rmId,
-    action: finding.recommendations[0] ?? "Review flagged transactions and verify documentation",
-    findingId: finding.id,
-    findingRef: finding.ref,
-    risk: finding.risk,
-    owner: "Unassigned",
-    dueDate: "29 Aug 2026",
-    status: "Not Started",
-    priority: finding.risk === "Critical" ? "P1" : finding.risk === "High" ? "P2" : "P3",
-  };
+  const remediation = generateRemediationFromFinding(finding);
 
   const notification: AppNotification = {
     id: `n-${ts}`,

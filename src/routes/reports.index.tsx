@@ -17,6 +17,7 @@ import {
   simulateIngestion,
   generateFindingFromReport,
   generateEvidenceFromReport,
+  generateRemediationFromFinding,
 } from "@/services/reportService";
 import { useAppStore } from "@/store/appStore";
 import { BRANCHES, SECTORS } from "@/data/mockData";
@@ -44,8 +45,16 @@ export const Route = createFileRoute("/reports/")({
 });
 
 function ReportsPage() {
-  const { reports, findings, addReport, updateReport, addFinding, addEvidence, addDocument } =
-    useAppStore();
+  const {
+    reports,
+    findings,
+    addReport,
+    updateReport,
+    addFinding,
+    addEvidence,
+    addDocument,
+    addRemediation,
+  } = useAppStore();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [dragging, setDragging] = useState(false);
@@ -127,9 +136,12 @@ function ReportsPage() {
         const { evidence, document } = generateEvidenceFromReport(report, finding);
         finding.evidenceIds = [evidence.id];
 
+        const remediationAction = generateRemediationFromFinding(finding);
+
         addFinding(finding);
         addEvidence(evidence);
         addDocument(document);
+        addRemediation(remediationAction);
 
         updateReport(id, {
           status: "Analysis Complete",
@@ -139,7 +151,7 @@ function ReportsPage() {
           aiConfidence: finding.confidence,
         });
         toast.success(
-          `${fileName} processed — finding ${finding.ref} and linked evidence created.`,
+          `${fileName} processed — finding ${finding.ref} and remediation action created.`,
         );
       }
     });
