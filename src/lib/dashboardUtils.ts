@@ -88,37 +88,6 @@ export function isActiveFinding(f: Finding): boolean {
   return f.status !== "Resolved" && f.status !== "Dismissed";
 }
 
-export function computeAuditCoverage(
-  reports: BankReport[],
-  branch = "all",
-  sector = "all",
-): {
-  percentage: number;
-  branchesCovered: number;
-  totalBranches: number;
-  subtitle: string;
-} {
-  const totalBranches = BRANCHES.length;
-  if (branch !== "all") {
-    const hasReport = reports.some((r) => r.branchCode === branch);
-    return {
-      percentage: hasReport ? 100 : 0,
-      branchesCovered: hasReport ? 1 : 0,
-      totalBranches: 1,
-      subtitle: hasReport ? `Branch ${branch} covered` : `No reports filed for ${branch}`,
-    };
-  }
-
-  const branchesCovered = new Set(reports.map((r) => r.branchCode)).size;
-  const percentage = totalBranches > 0 ? Math.round((branchesCovered / totalBranches) * 100) : 0;
-  const subtitle =
-    sector !== "all"
-      ? `Across ${branchesCovered} of ${totalBranches} branches (${sector})`
-      : `Across ${branchesCovered} of ${totalBranches} branches`;
-
-  return { percentage, branchesCovered, totalBranches, subtitle };
-}
-
 export function computeKpis(
   reports: BankReport[],
   findings: Finding[],
@@ -127,8 +96,8 @@ export function computeKpis(
 ) {
   const active = findings.filter(isActiveFinding);
   const critical = findings.filter((f) => f.risk === "Critical");
-  const coverage = computeAuditCoverage(reports, branch, sector);
   const immediate = active.filter((f) => f.risk === "Critical" || f.risk === "High").length;
+  const branchesCovered = new Set(reports.map((r) => r.branchCode)).size;
 
   return [
     {
@@ -140,7 +109,7 @@ export function computeKpis(
           ? `Filtered to branch ${branch}`
           : sector !== "all"
             ? `${reports.length} report${reports.length === 1 ? "" : "s"} in ${sector}`
-            : `${coverage.branchesCovered} branches represented`,
+            : `${branchesCovered} branches represented`,
       icon: "FileText" as const,
       tone: "navy" as const,
       href: "/reports",
@@ -165,15 +134,6 @@ export function computeKpis(
       icon: "ShieldAlert" as const,
       tone: "critical" as const,
       href: "/findings?risk=Critical",
-    },
-    {
-      id: "coverage",
-      label: "Audit Coverage",
-      value: `${coverage.percentage}%`,
-      subtitle: coverage.subtitle,
-      icon: "Target" as const,
-      tone: "teal" as const,
-      href: "/audit-intelligence",
     },
   ];
 }

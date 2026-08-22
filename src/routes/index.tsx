@@ -1,13 +1,11 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, CalendarIcon, Sparkles } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { PageHeader, Panel } from "@/components/audit/SectionHeader";
 import { KpiCard } from "@/components/audit/KpiCard";
 import { RiskBadge } from "@/components/audit/RiskBadge";
 import { FindingsTable } from "@/components/audit/FindingsTable";
-import { AuditPipeline } from "@/components/audit/AuditPipeline";
-import { RiskTrendChart, type RiskMetric } from "@/components/audit/charts";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -22,11 +20,9 @@ import { BRANCHES, SECTORS } from "@/data/mockData";
 import { useAppStore } from "@/store/appStore";
 import { cn } from "@/lib/utils";
 import {
-  computeFilteredRiskTrend,
   computeKpis,
   filterFindings,
   filterReports,
-  generateDashboardInsight,
   isActiveFinding,
   DEMO_TODAY,
   type CustomDateRange,
@@ -54,7 +50,6 @@ export const Route = createFileRoute("/")({
 
 function Overview() {
   const { findings, reports } = useAppStore();
-  const [metric, setMetric] = useState<RiskMetric>("count");
   const [range, setRange] = useState<DateRangeKey>("this-week");
   const [customRange, setCustomRange] = useState<CustomDateRange | undefined>({
     from: subDays(DEMO_TODAY, 14),
@@ -78,16 +73,6 @@ function Overview() {
   const kpis = useMemo(
     () => computeKpis(filteredReports, filteredFindings, branch, sector),
     [filteredReports, filteredFindings, branch, sector],
-  );
-
-  const riskTrendData = useMemo(
-    () => computeFilteredRiskTrend(filteredFindings),
-    [filteredFindings],
-  );
-
-  const currentInsight = useMemo(
-    () => generateDashboardInsight(branch, sector, range, filteredFindings, filteredReports),
-    [branch, sector, range, filteredFindings, filteredReports],
   );
 
   const alerts = useMemo(
@@ -197,108 +182,59 @@ function Overview() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-3">
         {kpis.map((k) => (
           <KpiCard key={k.id} {...k} />
         ))}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-3">
-        <Panel
-          className="xl:col-span-2"
-          title="Risk Overview"
-          description="Findings by severity across the last 7 reporting weeks"
-          actions={
-            <Select value={metric} onValueChange={(v) => setMetric(v as RiskMetric)}>
-              <SelectTrigger className="h-8 w-40 text-xs" aria-label="Chart metric">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="count">Risk count</SelectItem>
-                <SelectItem value="score">Risk score</SelectItem>
-                <SelectItem value="branches">Branches affected</SelectItem>
-              </SelectContent>
-            </Select>
-          }
-        >
-          <div className="grid gap-4 lg:grid-cols-[1fr_15rem]">
-            <RiskTrendChart metric={metric} data={riskTrendData} />
-            <aside className="rounded-lg border border-primary/25 bg-accent/60 p-3">
-              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-accent-foreground">
-                <Sparkles className="size-3.5" aria-hidden />
-                AI Insight
+      <Panel
+        title="Critical Alerts"
+        description="Highest scoring open findings"
+        bodyClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 p-3"
+      >
+        {alerts.length === 0 ? (
+          <p className="col-span-full text-sm text-muted-foreground">
+            No critical or high alerts match the current filters.
+          </p>
+        ) : (
+          alerts.map((f) => (
+            <Link
+              key={f.id}
+              to="/findings/$id"
+              params={{ id: f.id }}
+              className="block rounded-lg border border-border bg-card p-3 transition-shadow hover:shadow-raised"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-medium text-foreground">{f.title}</p>
+                <RiskBadge risk={f.risk} />
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Branch {f.branchCode} · {f.sector}
               </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-foreground">{currentInsight}</p>
-              <Link
-                to="/audit-intelligence"
-                className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-              >
-                Open audit intelligence
-                <ArrowRight className="size-3.5" aria-hidden />
-              </Link>
-            </aside>
-          </div>
-        </Panel>
+              <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                <span className="num">
+                  Score <span className="font-semibold text-foreground">{f.score}/100</span>
+                </span>
+                <span>Detected {f.detected}</span>
+              </div>
+            </Link>
+          ))
+        )}
+      </Panel>
 
-        <Panel
-          title="Critical Alerts"
-          description="Highest scoring open findings"
-          bodyClassName="space-y-2 p-3"
-        >
-          {alerts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No critical or high alerts match the current filters.
-            </p>
-          ) : (
-            alerts.map((f) => (
-              <Link
-                key={f.id}
-                to="/findings/$id"
-                params={{ id: f.id }}
-                className="block rounded-lg border border-border bg-card p-3 transition-shadow hover:shadow-raised"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-medium text-foreground">{f.title}</p>
-                  <RiskBadge risk={f.risk} />
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Branch {f.branchCode} · {f.sector}
-                </p>
-                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="num">
-                    Score <span className="font-semibold text-foreground">{f.score}/100</span>
-                  </span>
-                  <span>Detected {f.detected}</span>
-                </div>
-              </Link>
-            ))
-          )}
-        </Panel>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-3">
-        <Panel
-          title="Current Audit Pipeline"
-          description="Multi-agent workflow status for this reporting week"
-          bodyClassName="p-3"
-        >
-          <AuditPipeline />
-        </Panel>
-
-        <Panel
-          className="xl:col-span-2"
-          title="Recent AI Findings"
-          description={`${filteredFindings.length} findings match the current filters`}
-          actions={
-            <Button asChild variant="outline" size="sm" className="h-8 text-xs">
-              <Link to="/findings">View all</Link>
-            </Button>
-          }
-          bodyClassName="p-0"
-        >
-          <FindingsTable findings={filteredFindings} />
-        </Panel>
-      </div>
+      <Panel
+        title="Recent AI Findings"
+        description={`${filteredFindings.length} findings match the current filters`}
+        actions={
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs">
+            <Link to="/findings">View all</Link>
+          </Button>
+        }
+        bodyClassName="p-0"
+      >
+        <FindingsTable findings={filteredFindings} />
+      </Panel>
     </div>
   );
 }
