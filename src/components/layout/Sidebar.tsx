@@ -18,11 +18,11 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { to: "/", label: "Overview", Icon: LayoutDashboard },
+  { to: "/assistant", label: "AI Assistant", Icon: Bot },
   { to: "/reports", label: "Reports", Icon: FileText },
   { to: "/audit-intelligence", label: "Audit Intelligence", Icon: BarChart3 },
   { to: "/findings", label: "Findings", Icon: ShieldAlert },
   { to: "/remediation", label: "Remediation", Icon: ListChecks },
-  { to: "/assistant", label: "AI Assistant", Icon: Bot },
 ];
 
 const secondary = [
