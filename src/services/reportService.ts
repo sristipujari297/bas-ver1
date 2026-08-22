@@ -438,6 +438,91 @@ export function generateNotificationFromFinding(
   };
 }
 
+/** Generate the 6 sequential audit log events for report processing. */
+export function generateAuditLogsFromProcessing(
+  report: BankReport,
+  finding: Finding,
+  remediation: RemediationAction,
+): AuditLogEntry[] {
+  const ts = Date.now();
+  const now =
+    "22 Aug · " +
+    new Date().toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+  return [
+    {
+      id: `log-${ts}-1`,
+      timestamp: now,
+      workflow: "Report Ingestion",
+      agent: "Ingestion Agent",
+      action: "Report Uploaded",
+      status: "Success",
+      duration: "0.6s",
+      report: report.name,
+      details: `Uploaded ${report.name} (${report.fileType}) for ${report.branch} (${report.branchCode}).`,
+    },
+    {
+      id: `log-${ts}-2`,
+      timestamp: now,
+      workflow: "Document Parsing",
+      agent: "DocumentParser",
+      action: "Report Parsed",
+      status: "Success",
+      duration: "1.4s",
+      report: report.name,
+      details: `Parsed ${report.pages} pages, 18 tables, and extracted ${report.records} financial records.`,
+    },
+    {
+      id: `log-${ts}-3`,
+      timestamp: now,
+      workflow: "Evidence Extraction",
+      agent: "VectorIndexer",
+      action: "Evidence Extracted",
+      status: "Success",
+      duration: "1.1s",
+      report: report.name,
+      details: `Extracted evidence citations and indexed vector chunks into pgvector store.`,
+    },
+    {
+      id: `log-${ts}-4`,
+      timestamp: now,
+      workflow: "Audit Analysis",
+      agent: "AuditScoringAgent",
+      action: "AI Analysis Completed",
+      status: "Success",
+      duration: "2.8s",
+      report: report.name,
+      details: `Evaluated audit rules across ${report.sector} with ${finding.confidence}% AI confidence. Risk score: ${finding.score}/100.`,
+    },
+    {
+      id: `log-${ts}-5`,
+      timestamp: now,
+      workflow: "Finding Generation",
+      agent: "AuditAnalystAgent",
+      action: "Finding Created",
+      status: "Success",
+      duration: "0.9s",
+      report: report.name,
+      details: `Created finding ${finding.ref} (${finding.title}) with risk severity ${finding.risk}.`,
+    },
+    {
+      id: `log-${ts}-6`,
+      timestamp: now,
+      workflow: "Remediation Planning",
+      agent: "Remediation Agent",
+      action: "Remediation Created",
+      status: "Success",
+      duration: "0.7s",
+      report: report.name,
+      details: `Drafted ${remediation.priority} action: "${remediation.action}" due ${remediation.dueDate}.`,
+    },
+  ];
+}
+
 export interface ReportAnalysisResult {
   finding: Finding;
   evidenceRefs: EvidenceRef[];
@@ -452,55 +537,11 @@ export function generateAnalysisFromReport(
   report: BankReport,
   existingFindingCount: number,
 ): ReportAnalysisResult {
-  const ts = Date.now();
   const finding = generateFindingFromReport(report, existingFindingCount);
   const { evidence, document } = generateEvidenceFromReport(report, finding);
   const remediation = generateRemediationFromFinding(finding);
   const notification = generateNotificationFromFinding(report, finding);
-
-  const now =
-    "22 Aug · " +
-    new Date().toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-
-  const auditLogs: AuditLogEntry[] = [
-    {
-      id: `log-${ts}-1`,
-      timestamp: now,
-      workflow: "Report Ingestion",
-      agent: "DocumentParser",
-      action: "Extracted tables, metadata and text chunks",
-      status: "Success",
-      duration: "1.2s",
-      report: report.name,
-      details: `Parsed ${report.pages} pages, ${report.records} records across ${report.branch}.`,
-    },
-    {
-      id: `log-${ts}-2`,
-      timestamp: now,
-      workflow: "Evidence Indexing",
-      agent: "VectorIndexer",
-      action: "Generated chunk embeddings & linked evidence citations",
-      status: "Success",
-      duration: "0.8s",
-      report: report.name,
-      details: `Generated evidence locator ${evidence.locator}.`,
-    },
-    {
-      id: `log-${ts}-3`,
-      timestamp: now,
-      workflow: "Risk Scoring",
-      agent: "AuditScoringAgent",
-      action: `Generated finding ${finding.ref}: ${finding.title}`,
-      status: "Success",
-      duration: "1.6s",
-      report: report.name,
-      details: `Risk score: ${finding.score}/100, AI confidence: ${finding.confidence}%.`,
-    },
-  ];
+  const auditLogs = generateAuditLogsFromProcessing(report, finding, remediation);
 
   return {
     finding: { ...finding, evidenceIds: [evidence.id] },

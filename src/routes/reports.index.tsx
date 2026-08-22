@@ -19,6 +19,7 @@ import {
   generateEvidenceFromReport,
   generateRemediationFromFinding,
   generateNotificationFromFinding,
+  generateAuditLogsFromProcessing,
 } from "@/services/reportService";
 import { useAppStore } from "@/store/appStore";
 import { BRANCHES, SECTORS } from "@/data/mockData";
@@ -56,6 +57,7 @@ function ReportsPage() {
     addDocument,
     addRemediation,
     addNotification,
+    addAuditLog,
   } = useAppStore();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -140,12 +142,14 @@ function ReportsPage() {
 
         const remediationAction = generateRemediationFromFinding(finding);
         const notification = generateNotificationFromFinding(report, finding);
+        const auditLogs = generateAuditLogsFromProcessing(report, finding, remediationAction);
 
         addFinding(finding);
         addEvidence(evidence);
         addDocument(document);
         addRemediation(remediationAction);
         addNotification(notification);
+        addAuditLog(auditLogs);
 
         updateReport(id, {
           status: "Analysis Complete",
