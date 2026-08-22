@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { AlertTriangle, ArrowLeft, Sparkles } from "lucide-react";
 import { PageHeader, Panel, EmptyState, MetaItem } from "@/components/audit/SectionHeader";
@@ -14,6 +14,27 @@ import { useAppStore } from "@/store/appStore";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/reports/$id")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    tab?: string | undefined;
+    page?: number | undefined;
+    highlight?: string | undefined;
+  } => {
+    const res: {
+      tab?: string | undefined;
+      page?: number | undefined;
+      highlight?: string | undefined;
+    } = {};
+    if (typeof search["tab"] === "string") res.tab = search["tab"];
+    if (typeof search["page"] === "number") res.page = search["page"];
+    else if (typeof search["page"] === "string") {
+      const p = parseInt(search["page"], 10);
+      if (!isNaN(p)) res.page = p;
+    }
+    if (typeof search["highlight"] === "string") res.highlight = search["highlight"];
+    return res;
+  },
   head: () => ({
     meta: [
       { title: "Report Detail — AuditAI" },
@@ -34,10 +55,16 @@ export const Route = createFileRoute("/reports/$id")({
 
 function ReportDetail() {
   const { id } = useParams({ from: "/reports/$id" });
+  const search = Route.useSearch();
   const { reports, findings, evidence } = useAppStore();
   const report = reports.find((r) => r.id === id);
-  const [focusPage, setFocusPage] = useState(0);
-  const [tab, setTab] = useState("overview");
+  const [focusPage, setFocusPage] = useState<number>(search.page ?? 0);
+  const [tab, setTab] = useState<string>(search.tab ?? "overview");
+
+  useEffect(() => {
+    if (search.tab) setTab(search.tab);
+    if (typeof search.page === "number") setFocusPage(search.page);
+  }, [search.tab, search.page]);
 
   if (!report) {
     return (
@@ -56,8 +83,11 @@ function ReportDetail() {
   }
 
   const linkedFindings = findings.filter((f) => report.findingIds.includes(f.id));
-  const linkedEvidence = evidence.filter((e) =>
-    e.documentName.toLowerCase().includes((report.name.split("_")[0] ?? "").toLowerCase()),
+  const linkedEvidence = evidence.filter(
+    (e) =>
+      e.documentName.toLowerCase().includes((report.name.split("_")[0] ?? "").toLowerCase()) ||
+      (report.findingIds && report.findingIds.some((fid) => e.findingIds.includes(fid))) ||
+      e.documentId === report.id,
   );
 
   const openSource = (page: number) => {
@@ -229,7 +259,12 @@ function ReportDetail() {
               <EmptyState title="No supporting evidence was found for this report." />
             ) : (
               linkedEvidence.map((e) => (
-                <EvidenceCard key={e.id} evidence={e} onView={(ev) => setFocusPage(ev.page ?? 0)} />
+                <EvidenceCard
+                  key={e.id}
+                  evidence={e}
+                  highlight={search.highlight === e.id}
+                  onView={(ev) => setFocusPage(ev.page ?? 0)}
+                />
               ))
             )}
           </Panel>

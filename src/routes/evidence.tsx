@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { FileSpreadsheet, FileText, FileType2, Search, Table2 } from "lucide-react";
 import { PageHeader, Panel, EmptyState } from "@/components/audit/SectionHeader";
@@ -19,6 +19,17 @@ import { cn } from "@/lib/utils";
 const fileIcon = { PDF: FileText, XLSX: FileSpreadsheet, CSV: Table2, DOCX: FileType2 } as const;
 
 export const Route = createFileRoute("/evidence")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    doc?: string | undefined;
+    ref?: string | undefined;
+  } => {
+    const res: { doc?: string | undefined; ref?: string | undefined } = {};
+    if (typeof search["doc"] === "string") res.doc = search["doc"];
+    if (typeof search["ref"] === "string") res.ref = search["ref"];
+    return res;
+  },
   head: () => ({
     meta: [
       { title: "Evidence Library — Indexed Audit Documents" },
@@ -38,10 +49,15 @@ export const Route = createFileRoute("/evidence")({
 });
 
 function EvidencePage() {
+  const { doc: searchDoc, ref: searchRef } = Route.useSearch();
   const { documents, evidence, findings } = useAppStore();
   const [query, setQuery] = useState("");
   const [sector, setSector] = useState("all");
-  const [selected, setSelected] = useState<string | null>(documents[0]?.id ?? null);
+  const [selected, setSelected] = useState<string | null>(searchDoc ?? documents[0]?.id ?? null);
+
+  useEffect(() => {
+    if (searchDoc) setSelected(searchDoc);
+  }, [searchDoc]);
 
   const filteredDocs = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -158,7 +174,7 @@ function EvidencePage() {
             ) : (
               refs.map((e) => (
                 <div key={e.id} className="space-y-2">
-                  <EvidenceCard evidence={e} />
+                  <EvidenceCard evidence={e} highlight={searchRef === e.id} />
                   <div className="flex flex-wrap items-center gap-1.5 pl-1">
                     <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
                       Cited by

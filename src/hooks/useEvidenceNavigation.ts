@@ -15,7 +15,11 @@ export function useEvidenceNavigation() {
         void navigate({
           to: "/reports/$id",
           params: { id: target.reportId },
-          search: { tab: target.tab, page: target.page },
+          search: {
+            tab: target.tab,
+            page: target.page,
+            highlight: target.highlight,
+          },
         });
       } else {
         void navigate({

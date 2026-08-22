@@ -172,13 +172,7 @@ function FindingDetail() {
                 description="This finding was raised without a source reference."
               />
             ) : (
-              linkedEvidence.map((e) => (
-                <EvidenceCard
-                  key={e.id}
-                  evidence={e}
-                  onView={() => toast.info(`${e.documentName} · ${e.locator}`)}
-                />
-              ))
+              linkedEvidence.map((e) => <EvidenceCard key={e.id} evidence={e} />)
             )}
           </Panel>
         </TabsContent>

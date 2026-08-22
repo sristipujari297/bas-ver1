@@ -1,5 +1,6 @@
 import { FileSpreadsheet, FileText, FileType2, Table2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEvidenceNavigation } from "@/hooks/useEvidenceNavigation";
 import type { EvidenceRef } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -15,18 +16,26 @@ export function EvidenceCard({
   onView,
   actionLabel = "View Source",
   compact = false,
+  showAction = true,
+  highlight = false,
 }: {
   evidence: EvidenceRef;
   onView?: (evidence: EvidenceRef) => void;
   actionLabel?: string;
   compact?: boolean;
+  showAction?: boolean;
+  highlight?: boolean;
 }) {
+  const { openEvidence } = useEvidenceNavigation();
+  const handleView = onView ?? openEvidence;
   const Icon = fileIcon[evidence.fileType];
+
   return (
     <article
       className={cn(
-        "rounded-lg border border-border bg-card p-3 transition-shadow hover:shadow-card",
+        "rounded-lg border border-border bg-card p-3 transition-all hover:shadow-card",
         compact && "p-2.5",
+        highlight && "border-primary/60 bg-accent/40 ring-2 ring-primary ring-offset-2",
       )}
     >
       <div className="flex items-start gap-2.5">
@@ -34,19 +43,31 @@ export function EvidenceCard({
           <Icon className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground" title={evidence.documentName}>
-            {evidence.documentName}
-          </p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{evidence.locator}</p>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p
+                className="truncate text-sm font-medium text-foreground"
+                title={evidence.documentName}
+              >
+                {evidence.documentName}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{evidence.locator}</p>
+            </div>
+            {evidence.page && (
+              <span className="num rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                p. {evidence.page}
+              </span>
+            )}
+          </div>
           <blockquote className="mt-2 border-l-2 border-primary/40 bg-accent/40 py-1.5 pl-2.5 text-xs leading-relaxed text-foreground">
             {evidence.snippet}
           </blockquote>
-          {onView && (
+          {showAction && (
             <Button
               variant="outline"
               size="sm"
               className="mt-2.5 h-7 gap-1.5 px-2 text-xs"
-              onClick={() => onView(evidence)}
+              onClick={() => handleView(evidence)}
             >
               <ExternalLink className="size-3.5" aria-hidden />
               {actionLabel}
