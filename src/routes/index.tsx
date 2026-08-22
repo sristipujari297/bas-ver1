@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { dashboardInsight } from "@/services/auditService";
 import { BRANCHES, SECTORS } from "@/data/mockData";
 import { useAppStore } from "@/store/appStore";
 import {
@@ -23,6 +22,7 @@ import {
   computeKpis,
   filterFindings,
   filterReports,
+  generateDashboardInsight,
   isActiveFinding,
   type DateRangeKey,
 } from "@/lib/dashboardUtils";
@@ -53,22 +53,27 @@ function Overview() {
   const [branch, setBranch] = useState("all");
   const [sector, setSector] = useState("all");
 
-  const filterOpts = { branch, sector, range };
+  const filterOpts = useMemo(() => ({ branch, sector }), [branch, sector]);
 
   const filteredFindings = useMemo(
     () => filterFindings(findings, filterOpts),
-    [findings, branch, sector, range],
+    [findings, filterOpts],
   );
-  const filteredReports = useMemo(
-    () => filterReports(reports, filterOpts),
-    [reports, branch, sector, range],
-  );
+  const filteredReports = useMemo(() => filterReports(reports, filterOpts), [reports, filterOpts]);
 
-  const kpis = useMemo(() => computeKpis(reports, findings), [reports, findings]);
+  const kpis = useMemo(
+    () => computeKpis(filteredReports, filteredFindings, branch, sector),
+    [filteredReports, filteredFindings, branch, sector],
+  );
 
   const riskTrendData = useMemo(
     () => computeFilteredRiskTrend(filteredFindings),
     [filteredFindings],
+  );
+
+  const currentInsight = useMemo(
+    () => generateDashboardInsight(branch, sector, filteredFindings, filteredReports),
+    [branch, sector, filteredFindings, filteredReports],
   );
 
   const alerts = useMemo(
@@ -160,7 +165,7 @@ function Overview() {
                 <Sparkles className="size-3.5" aria-hidden />
                 AI Insight
               </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-foreground">{dashboardInsight}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-foreground">{currentInsight}</p>
               <Link
                 to="/audit-intelligence"
                 className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
