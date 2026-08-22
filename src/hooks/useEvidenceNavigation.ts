@@ -11,22 +11,15 @@ export function useEvidenceNavigation() {
   const openEvidence = useCallback(
     (evidence: EvidenceRef) => {
       const target = resolveEvidenceTarget(evidence, reports, documents);
-      if (target.type === "report") {
-        void navigate({
-          to: "/reports/$id",
-          params: { id: target.reportId },
-          search: {
-            tab: target.tab,
-            page: target.page,
-            highlight: target.highlight,
-          },
-        });
-      } else {
-        void navigate({
-          to: "/evidence",
-          search: { doc: target.documentId, ref: target.evidenceId },
-        });
-      }
+      void navigate({
+        to: "/reports/$id",
+        params: { id: target.reportId },
+        search: {
+          tab: target.tab,
+          page: target.page,
+          highlight: target.highlight,
+        },
+      });
     },
     [navigate, reports, documents],
   );

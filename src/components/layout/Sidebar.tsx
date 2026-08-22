@@ -3,7 +3,6 @@ import {
   Activity,
   BarChart3,
   Bot,
-  FileSearch,
   FileText,
   LayoutDashboard,
   ListChecks,
@@ -22,7 +21,6 @@ const nav = [
   { to: "/reports", label: "Reports", Icon: FileText },
   { to: "/audit-intelligence", label: "Audit Intelligence", Icon: BarChart3 },
   { to: "/findings", label: "Findings", Icon: ShieldAlert },
-  { to: "/evidence", label: "Evidence", Icon: FileSearch },
   { to: "/remediation", label: "Remediation", Icon: ListChecks },
   { to: "/assistant", label: "AI Assistant", Icon: Bot },
 ];

@@ -15,13 +15,7 @@ export interface ReportEvidenceTarget {
   highlight?: string | undefined;
 }
 
-export interface LibraryEvidenceTarget {
-  type: "evidence";
-  documentId: string;
-  evidenceId: string;
-}
-
-export type EvidenceViewerTarget = ReportEvidenceTarget | LibraryEvidenceTarget;
+export type EvidenceViewerTarget = ReportEvidenceTarget;
 
 /** Resolve the best viewer target for an evidence reference across reports and document library. */
 export function resolveEvidenceTarget(
@@ -139,11 +133,13 @@ export function resolveEvidenceTarget(
     }
   }
 
-  // 6. Fallback to Evidence Repository document view
-  const docId = doc?.id ?? evidence.documentId;
+  // 6. Fallback to first available report
+  const fallbackReport = reports[0];
   return {
-    type: "evidence",
-    documentId: docId,
-    evidenceId: evidence.id,
+    type: "report",
+    reportId: fallbackReport?.id ?? "r-001",
+    page: evidence.page ?? 1,
+    tab: "evidence",
+    highlight: evidence.id,
   };
 }

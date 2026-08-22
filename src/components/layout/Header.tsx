@@ -22,7 +22,6 @@ const titles: Record<string, string> = {
   "/reports": "Bank Reports",
   "/audit-intelligence": "Audit Intelligence",
   "/findings": "Audit Findings",
-  "/evidence": "Evidence Repository",
   "/remediation": "Remediation Center",
   "/assistant": "Audit Intelligence Assistant",
   "/logs": "Audit Logs",

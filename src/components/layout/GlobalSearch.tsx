@@ -85,14 +85,21 @@ export function GlobalSearch({
                 ))}
               </Group>
               <Group title="Evidence" icon={<FileSearch className="size-3.5" />}>
-                {results.evidence.map((d) => (
-                  <Row
-                    key={d.id}
-                    onClick={() => go("/evidence")}
-                    title={d.name}
-                    meta={`${d.branch} · ${d.date}`}
-                  />
-                ))}
+                {results.evidence.map((d) => {
+                  const matchReport = reports.find(
+                    (r) => r.name === d.name || r.id === d.id || r.branch === d.branch,
+                  );
+                  return (
+                    <Row
+                      key={d.id}
+                      onClick={() =>
+                        go(matchReport ? `/reports/${matchReport.id}?tab=evidence` : "/reports")
+                      }
+                      title={d.name}
+                      meta={`${d.branch} · ${d.date}`}
+                    />
+                  );
+                })}
               </Group>
             </div>
           )}

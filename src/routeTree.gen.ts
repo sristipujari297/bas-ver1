@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as AuditIntelligenceRouteImport } from './routes/audit-intelligence'
-import { Route as EvidenceRouteImport } from './routes/evidence'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LogsRouteImport } from './routes/logs'
 import { Route as RemediationRouteImport } from './routes/remediation'
@@ -35,11 +34,6 @@ const AssistantRoute = AssistantRouteImport.update({
 const AuditIntelligenceRoute = AuditIntelligenceRouteImport.update({
   id: '/audit-intelligence',
   path: '/audit-intelligence',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EvidenceRoute = EvidenceRouteImport.update({
-  id: '/evidence',
-  path: '/evidence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -87,7 +81,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/audit-intelligence': typeof AuditIntelligenceRoute
-  '/evidence': typeof EvidenceRoute
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/remediation': typeof RemediationRoute
@@ -101,7 +94,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/audit-intelligence': typeof AuditIntelligenceRoute
-  '/evidence': typeof EvidenceRoute
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/remediation': typeof RemediationRoute
@@ -116,7 +108,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/audit-intelligence': typeof AuditIntelligenceRoute
-  '/evidence': typeof EvidenceRoute
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/remediation': typeof RemediationRoute
@@ -132,7 +123,6 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/audit-intelligence'
-    | '/evidence'
     | '/login'
     | '/logs'
     | '/remediation'
@@ -146,7 +136,6 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/audit-intelligence'
-    | '/evidence'
     | '/login'
     | '/logs'
     | '/remediation'
@@ -160,7 +149,6 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/audit-intelligence'
-    | '/evidence'
     | '/login'
     | '/logs'
     | '/remediation'
@@ -175,7 +163,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssistantRoute: typeof AssistantRoute
   AuditIntelligenceRoute: typeof AuditIntelligenceRoute
-  EvidenceRoute: typeof EvidenceRoute
   LoginRoute: typeof LoginRoute
   LogsRoute: typeof LogsRoute
   RemediationRoute: typeof RemediationRoute
@@ -207,13 +194,6 @@ declare module '@tanstack/react-router' {
       path: '/audit-intelligence'
       fullPath: '/audit-intelligence'
       preLoaderRoute: typeof AuditIntelligenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/evidence': {
-      id: '/evidence'
-      path: '/evidence'
-      fullPath: '/evidence'
-      preLoaderRoute: typeof EvidenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -279,7 +259,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssistantRoute: AssistantRoute,
   AuditIntelligenceRoute: AuditIntelligenceRoute,
-  EvidenceRoute: EvidenceRoute,
   LoginRoute: LoginRoute,
   LogsRoute: LogsRoute,
   RemediationRoute: RemediationRoute,

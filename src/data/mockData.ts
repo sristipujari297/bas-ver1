@@ -961,7 +961,7 @@ export const notifications: AppNotification[] = [
     context: "12,480 chunks · pgvector",
     time: "3 hours ago",
     severity: "Info",
-    href: "/evidence",
+    href: "/reports",
     read: true,
   },
 ];
