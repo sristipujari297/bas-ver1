@@ -1,9 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
-import { FileText, ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import {
+  FileSpreadsheet,
+  FileText,
+  FileType2,
+  Table2,
+  ChevronLeft,
+  ChevronRight,
+  Lock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/audit/SectionHeader";
 import type { BankReport } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+const fileIcon = {
+  PDF: FileText,
+  XLSX: FileSpreadsheet,
+  CSV: Table2,
+  DOCX: FileType2,
+} as const;
 
 export function DocumentViewer({
   report,
@@ -16,9 +31,12 @@ export function DocumentViewer({
 }) {
   const pages = report.documentPages;
   const [active, setActive] = useState(pages[0]?.page ?? 1);
+  const Icon = fileIcon[report.fileType] ?? FileText;
 
   useEffect(() => {
-    if (focusPage && pages.some((p) => p.page === focusPage)) setActive(focusPage);
+    if (focusPage && pages.some((p) => p.page === focusPage)) {
+      setActive(focusPage);
+    }
   }, [focusPage, pages]);
 
   const index = useMemo(() => pages.findIndex((p) => p.page === active), [pages, active]);
@@ -35,18 +53,20 @@ export function DocumentViewer({
   if (!current) {
     return (
       <EmptyState
-        icon={<FileText className="size-6" aria-hidden />}
+        icon={<Icon className="size-6" aria-hidden />}
         title="No document preview available"
         description="This report failed extraction, so no rendered pages could be produced."
       />
     );
   }
 
+  const isSpreadsheet = report.fileType === "XLSX" || report.fileType === "CSV";
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/60 px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
-          <FileText className="size-4 shrink-0 text-navy" aria-hidden />
+          <Icon className="size-4 shrink-0 text-navy" aria-hidden />
           <span className="truncate text-xs font-medium text-foreground">{report.name}</span>
         </div>
         <div className="flex items-center gap-1">
@@ -61,7 +81,7 @@ export function DocumentViewer({
             <ChevronLeft className="size-4" aria-hidden />
           </Button>
           <span className="num px-1 text-xs text-muted-foreground">
-            Page {current.page} / {report.pages}
+            {isSpreadsheet ? `Sheet/Page ${current.page}` : `Page ${current.page}`} / {report.pages}
           </span>
           <Button
             variant="outline"
