@@ -275,6 +275,118 @@ export function generateFindingFromReport(
   return finding;
 }
 
+/** Generate realistic mock evidence and associated document object linked to a finding and report. */
+export function generateEvidenceFromReport(
+  report: BankReport,
+  finding: Finding,
+): {
+  evidence: EvidenceRef;
+  document: EvidenceDocument;
+} {
+  const ts = Date.now();
+  const evId = `ev-${ts}`;
+  const docId = `doc-${ts}`;
+  const fileType = report.fileType;
+  const sector = report.sector;
+  const nameLower = report.name.toLowerCase();
+
+  let locator: string;
+  let page: number | undefined;
+  let snippet: string;
+
+  if (fileType === "PDF") {
+    page =
+      report.documentPages.find((p) => p.highlight)?.page ?? report.documentPages[0]?.page ?? 7;
+
+    let section = "Section 4.2 · High-Value Outbound Transactions";
+    if (sector === "Retail Banking" || nameLower.includes("retail") || nameLower.includes("kyc")) {
+      section = "Section 2.1 · Customer Due Diligence Audit Sampling";
+      snippet =
+        "Audit sample of 100 customer account onboarding files revealed 14 accounts activated with manual KYC override without secondary PAN/Aadhaar biometric re-validation.";
+    } else if (
+      sector === "Treasury" ||
+      nameLower.includes("treasury") ||
+      nameLower.includes("fx")
+    ) {
+      section = "Section 3.4 · Daily FX Forward Deal Executions";
+      snippet =
+        "Deal ticket log records 3 USD/INR forward contracts executed at 84.12 (+18 bps above 83.94 mid-rate benchmark) without documented dealer rationale or supervisory override tag.";
+    } else if (
+      sector === "SME Banking" ||
+      nameLower.includes("sme") ||
+      nameLower.includes("credit")
+    ) {
+      section = "Section 5.1 · Working Capital Credit Facility Review";
+      snippet =
+        "Drawing power computation for 6 cash-credit facilities omitted deduction of INR 4.2 Cr in book debts overdue >90 days, resulting in unauthorized limit expansion.";
+    } else {
+      snippet =
+        report.documentPages.find((p) => p.page === page)?.lines.join(" ") ??
+        "Total outbound transaction volume for the reporting period reached INR 388.1 Cr (+162% vs prior week), concentrated across 19 counterparties with only INR 91.4 Cr in matching sanctioned loan disbursement records.";
+    }
+    locator = `Page ${page} · ${section}`;
+  } else if (fileType === "XLSX") {
+    let sheet = "Disbursement_Data";
+    let rows = "Rows 142–186";
+    if (sector === "Retail Banking" || nameLower.includes("retail")) {
+      sheet = "KYC_Exception_Register";
+      rows = "Rows 48–86";
+      snippet =
+        "14 onboarding records logged with status 'AML Override Active' and blank biometric timestamp verification fields.";
+    } else if (sector === "Treasury" || nameLower.includes("treasury")) {
+      sheet = "FX_Trade_Blotter";
+      rows = "Rows 12–28";
+      snippet =
+        "Forward contracts FWD-2026-0881 through 0883 booked with 18 bps variance from Reuters interbank mid-rate.";
+    } else if (sector === "SME Banking" || nameLower.includes("sme")) {
+      sheet = "Drawing_Power_Calc";
+      rows = "Rows 92–114";
+      snippet =
+        "Eligible debtor receivables column includes overdue invoices exceeding 90-day aging cutoff for 6 borrower accounts.";
+    } else {
+      sheet = "Transaction_Ledger";
+      rows = "Rows 182–215";
+      snippet =
+        "19 transaction records totalling INR 388.1 Cr logged without matching sanction-letter IDs in the core credit approval column (Cols D–F).";
+    }
+    locator = `Sheet: ${sheet} · ${rows}`;
+  } else if (fileType === "CSV") {
+    locator = "Rows 84–128 · Exception Records";
+    snippet =
+      "Automated exception report flags 26 transactions exceeding daily single-originator limit of INR 10 Cr without required dual-authorization approval tags.";
+  } else {
+    // DOCX
+    locator = "Section 3.2 · Internal Control & Compliance Observations";
+    snippet =
+      "Branch internal audit notes identify 3 unmitigated control deficiencies in manual batch ledger reconciliation and dual-authorization procedures.";
+  }
+
+  const evidence: EvidenceRef = {
+    id: evId,
+    documentId: docId,
+    documentName: report.name,
+    fileType: report.fileType,
+    locator,
+    page,
+    snippet,
+    findingIds: [finding.id],
+  };
+
+  const document: EvidenceDocument = {
+    id: docId,
+    name: report.name,
+    fileType: report.fileType,
+    branch: `${report.branch} · ${report.branchCode}`,
+    sector: report.sector,
+    date: "Just now",
+    pages: report.pages || 22,
+    indexed: true,
+    linkedFindingIds: [finding.id],
+  };
+
+  return { evidence, document };
+}
+
 export interface ReportAnalysisResult {
   finding: Finding;
   evidenceRefs: EvidenceRef[];
@@ -291,39 +403,8 @@ export function generateAnalysisFromReport(
 ): ReportAnalysisResult {
   const ts = Date.now();
   const finding = generateFindingFromReport(report, existingFindingCount);
-  const docId = `doc-${ts}`;
-  const evId = `ev-${ts}`;
+  const { evidence, document } = generateEvidenceFromReport(report, finding);
   const rmId = `rm-${ts}`;
-
-  const page =
-    report.documentPages.find((p) => p.highlight)?.page ?? report.documentPages[0]?.page ?? 7;
-
-  const snippet =
-    report.documentPages.find((p) => p.page === page)?.lines.join(" ") ??
-    "Loan disbursement volume increased materially versus the prior reporting period, concentrated in high-value counterparties.";
-
-  const evidenceRef: EvidenceRef = {
-    id: evId,
-    documentId: docId,
-    documentName: report.name,
-    fileType: report.fileType,
-    locator: `Page ${page} · Transaction Summary`,
-    page,
-    snippet,
-    findingIds: [finding.id],
-  };
-
-  const document: EvidenceDocument = {
-    id: docId,
-    name: report.name,
-    fileType: report.fileType,
-    branch: `${report.branch} · ${report.branchCode}`,
-    sector: report.sector,
-    date: "Just now",
-    pages: report.pages,
-    indexed: true,
-    linkedFindingIds: [finding.id],
-  };
 
   const remediation: RemediationAction = {
     id: rmId,
@@ -376,7 +457,7 @@ export function generateAnalysisFromReport(
       status: "Success",
       duration: "0.8s",
       report: report.name,
-      details: `Generated evidence locator Page ${page}.`,
+      details: `Generated evidence locator ${evidence.locator}.`,
     },
     {
       id: `log-${ts}-3`,
@@ -392,8 +473,8 @@ export function generateAnalysisFromReport(
   ];
 
   return {
-    finding: { ...finding, evidenceIds: [evId] },
-    evidenceRefs: [evidenceRef],
+    finding: { ...finding, evidenceIds: [evidence.id] },
+    evidenceRefs: [evidence],
     document,
     remediation,
     notification,

@@ -27,7 +27,7 @@ export interface EvidenceRef {
   documentName: string;
   fileType: "PDF" | "XLSX" | "CSV" | "DOCX";
   locator: string;
-  page?: number;
+  page?: number | undefined;
   snippet: string;
   findingIds: string[];
 }
@@ -69,7 +69,7 @@ export interface Finding {
   causeChain: string[];
   evidenceIds: string[];
   recommendations: string[];
-  reportId?: string;
+  reportId?: string | undefined;
 }
 
 export interface BankReport {
@@ -88,8 +88,19 @@ export interface BankReport {
   pages: number;
   records: number;
   findingIds: string[];
-  extracted: { label: string; value: string; delta?: string; page: number; anomaly?: boolean }[];
-  documentPages: { page: number; heading: string; lines: string[]; highlight?: boolean }[];
+  extracted: {
+    label: string;
+    value: string;
+    delta?: string | undefined;
+    page: number;
+    anomaly?: boolean | undefined;
+  }[];
+  documentPages: {
+    page: number;
+    heading: string;
+    lines: string[];
+    highlight?: boolean | undefined;
+  }[];
   aiSummary: string;
   aiConfidence: number;
 }

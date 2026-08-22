@@ -13,7 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { simulateIngestion, generateFindingFromReport } from "@/services/reportService";
+import {
+  simulateIngestion,
+  generateFindingFromReport,
+  generateEvidenceFromReport,
+} from "@/services/reportService";
 import { useAppStore } from "@/store/appStore";
 import { BRANCHES, SECTORS } from "@/data/mockData";
 import type { BankReport } from "@/lib/types";
@@ -40,7 +44,8 @@ export const Route = createFileRoute("/reports/")({
 });
 
 function ReportsPage() {
-  const { reports, findings, addReport, updateReport, addFinding } = useAppStore();
+  const { reports, findings, addReport, updateReport, addFinding, addEvidence, addDocument } =
+    useAppStore();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [dragging, setDragging] = useState(false);
@@ -119,7 +124,13 @@ function ReportsPage() {
           { ...report, status: "Analysis Complete", progress: 100 },
           findings.length,
         );
+        const { evidence, document } = generateEvidenceFromReport(report, finding);
+        finding.evidenceIds = [evidence.id];
+
         addFinding(finding);
+        addEvidence(evidence);
+        addDocument(document);
+
         updateReport(id, {
           status: "Analysis Complete",
           progress: 100,
@@ -127,7 +138,9 @@ function ReportsPage() {
           aiSummary: finding.whyFlagged,
           aiConfidence: finding.confidence,
         });
-        toast.success(`${fileName} processed — finding ${finding.ref} created.`);
+        toast.success(
+          `${fileName} processed — finding ${finding.ref} and linked evidence created.`,
+        );
       }
     });
   };
