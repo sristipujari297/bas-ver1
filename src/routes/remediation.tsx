@@ -22,6 +22,7 @@ const STATUSES: RemediationStatus[] = [
   "Pending Verification",
   "Completed",
   "Overdue",
+  "Dismissed",
 ];
 
 export const Route = createFileRoute("/remediation")({
@@ -108,7 +109,7 @@ function RemediationPage() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {counts.map((c) => (
           <article key={c.status} className="panel p-3">
             <p className="text-xs text-muted-foreground">{c.status}</p>
@@ -202,7 +203,7 @@ function RemediationPage() {
           )}
         </Panel>
       ) : (
-        <div className="grid gap-3 lg:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
           {counts.map((col) => (
             <Panel
               key={col.status}

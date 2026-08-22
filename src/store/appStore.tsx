@@ -108,6 +108,40 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       setFindings((prev) =>
         prev.map((f) => (f.id === id ? { ...f, status, reviewStage: stage ?? f.reviewStage } : f)),
       );
+
+      setRemediation((prev) =>
+        prev.map((a) => {
+          if (a.findingId !== id) return a;
+
+          // 1. If finding is dismissed/false positive, associated remediation must not remain active
+          if (status === "Dismissed") {
+            return { ...a, status: "Dismissed" as RemediationStatus };
+          }
+
+          // 2. If remediation is approved, update associated remediation to In Progress
+          if (status === "Remediation Pending" || stage === "Remediation Approved") {
+            if (a.status === "Not Started" || a.status === "Dismissed") {
+              return { ...a, status: "In Progress" as RemediationStatus };
+            }
+          }
+
+          // 3. If finding is confirmed, associated remediation remains active/available
+          if (status === "Confirmed" || status === "Under Review" || status === "New") {
+            if (a.status === "Dismissed") {
+              return { ...a, status: "Not Started" as RemediationStatus };
+            }
+          }
+
+          // 4. If finding is resolved, mark non-dismissed remediation as completed
+          if (status === "Resolved") {
+            if (a.status !== "Dismissed") {
+              return { ...a, status: "Completed" as RemediationStatus };
+            }
+          }
+
+          return a;
+        }),
+      );
     },
     [],
   );
@@ -116,26 +150,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     setFindings((prev) => prev.map((f) => (f.id === id ? { ...f, owner } : f)));
   }, []);
 
-  const confirmFinding = useCallback((id: string) => {
-    setFindings((prev) =>
-      prev.map((f) =>
-        f.id === id
-          ? {
-              ...f,
-              status: "Remediation Pending" as FindingStatus,
-              reviewStage: "Remediation Approved" as ReviewStage,
-            }
-          : f,
-      ),
-    );
-    setRemediation((prev) =>
-      prev.map((a) =>
-        a.findingId === id && a.status === "Not Started"
-          ? { ...a, status: "In Progress" as RemediationStatus }
-          : a,
-      ),
-    );
-  }, []);
+  const confirmFinding = useCallback(
+    (id: string) => {
+      updateFindingStatus(id, "Confirmed", "Auditor Confirmed");
+    },
+    [updateFindingStatus],
+  );
 
   const deleteFinding = useCallback((id: string) => {
     setFindings((prev) => prev.filter((f) => f.id !== id));

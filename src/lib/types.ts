@@ -16,7 +16,7 @@ export type ReportStatus =
   "Uploaded" | "Parsing" | "Processing" | "Indexed" | "Analysis Complete" | "Failed";
 
 export type RemediationStatus =
-  "Not Started" | "In Progress" | "Pending Verification" | "Completed" | "Overdue";
+  "Not Started" | "In Progress" | "Pending Verification" | "Completed" | "Overdue" | "Dismissed";
 
 export type ReviewStage =
   "AI Suggested" | "Pending Auditor Review" | "Auditor Confirmed" | "Remediation Approved";

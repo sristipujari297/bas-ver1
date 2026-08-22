@@ -212,6 +212,22 @@ function FindingDetail() {
                 </div>
               ))
             )}
+            {actions.length > 0 &&
+              finding.reviewStage !== "Remediation Approved" &&
+              finding.status !== "Dismissed" && (
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="w-full gap-1.5"
+                  onClick={() => {
+                    updateFindingStatus(finding.id, "Remediation Pending", "Remediation Approved");
+                    toast.success(`Remediation for ${finding.ref} approved and action activated.`);
+                  }}
+                >
+                  <CheckCircle2 className="size-4" aria-hidden />
+                  Approve remediation plan
+                </Button>
+              )}
             <Button asChild variant="outline" size="sm" className="w-full">
               <Link to="/remediation">Open remediation tracker</Link>
             </Button>
@@ -237,6 +253,17 @@ function FindingDetail() {
               >
                 <CheckCircle2 className="size-4" aria-hidden />
                 Confirm finding
+              </Button>
+              <Button
+                className="gap-1.5"
+                variant="secondary"
+                onClick={() => {
+                  updateFindingStatus(finding.id, "Remediation Pending", "Remediation Approved");
+                  toast.success(`Remediation for ${finding.ref} approved and action activated.`);
+                }}
+              >
+                <ClipboardList className="size-4" aria-hidden />
+                Approve remediation
               </Button>
               <Button
                 variant="outline"
