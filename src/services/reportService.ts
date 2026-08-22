@@ -5,7 +5,9 @@ import type {
   EvidenceDocument,
   EvidenceRef,
   Finding,
+  FindingType,
   RemediationAction,
+  RiskLevel,
 } from "@/lib/types";
 
 /**
@@ -24,16 +26,253 @@ export interface UploadTick {
 /** Simulates the ingestion pipeline for a newly uploaded file. */
 export async function simulateIngestion(onTick: (tick: UploadTick) => void): Promise<void> {
   const steps: UploadTick[] = [
-    { progress: 18, status: "Uploaded", message: "Uploading document..." },
-    { progress: 42, status: "Parsing", message: "Parsing financial tables..." },
-    { progress: 68, status: "Processing", message: "Extracting KPIs and records..." },
-    { progress: 86, status: "Indexed", message: "Embedding evidence chunks..." },
-    { progress: 100, status: "Analysis Complete", message: "Audit analysis complete." },
+    { progress: 16, status: "Uploaded", message: "Uploading document..." },
+    { progress: 35, status: "Parsing", message: "Parsing financial tables..." },
+    { progress: 55, status: "Processing", message: "Extracting KPIs and records..." },
+    { progress: 75, status: "Indexed", message: "Extracting evidence chunks..." },
+    { progress: 90, status: "Processing", message: "Running AI analysis..." },
+    {
+      progress: 100,
+      status: "Analysis Complete",
+      message: "Analysis complete — new finding created.",
+    },
   ];
   for (const step of steps) {
-    await delay(750);
+    await delay(650);
     onTick(step);
   }
+}
+
+export function nextFindingRef(existingCount: number): string {
+  return `#${String(existingCount + 1).padStart(3, "0")}`;
+}
+
+/** Generate a realistic, deterministic finding associated with an uploaded report. */
+export function generateFindingFromReport(
+  report: BankReport,
+  existingFindingCount: number,
+): Finding {
+  const ts = Date.now();
+  const findingId = `f-${ts}`;
+  const ref = nextFindingRef(existingFindingCount);
+
+  const nameLower = report.name.toLowerCase();
+  const sector = report.sector;
+
+  let template: {
+    title: string;
+    type: FindingType;
+    risk: RiskLevel;
+    score: number;
+    confidence: number;
+    whyFlagged: string;
+    observedPattern: string;
+    potentialCause: string;
+    affectedControls: string[];
+    riskImplication: string;
+    causeChain: string[];
+    recommendations: string[];
+  };
+
+  if (
+    sector === "Corporate Lending" ||
+    nameLower.includes("loan") ||
+    nameLower.includes("lending")
+  ) {
+    template = {
+      title: "Unusual Loan Disbursement Pattern",
+      type: "Loan Disbursement Anomaly",
+      risk: "Critical",
+      score: 92,
+      confidence: 91,
+      whyFlagged:
+        "Outbound corporate transaction activity rose 162% week-on-week while reported loan disbursements moved only 28%, creating an unexplained variance in reported credit KPIs.",
+      observedPattern:
+        "Outbound transaction volume reached INR 388.1 Cr across 19 counterparties, but sanctioned loan schedule records showed only INR 91.4 Cr.",
+      potentialCause:
+        "Disbursements executed outside the sanctioned credit line or delayed entry into the central loan management ledger.",
+      affectedControls: [
+        "Sanction-letter to disbursement matching",
+        "Maker-checker on high-value corporate transfers",
+        "Weekly loan ledger reconciliation",
+      ],
+      riskImplication:
+        "Unmonitored credit exposure exceeding sanction limits, potential credit-line breach, and financial reporting misstatement.",
+      causeChain: [
+        "Elevated corporate transaction volume",
+        "Mismatch with sanctioned disbursement ledger",
+        "Variance exceeded 25% anomaly threshold",
+        "Potential control bypass during credit release",
+      ],
+      recommendations: [
+        "Conduct immediate review of high-value disbursements for the reporting period.",
+        "Obtain sanction notes and committee approvals for the 19 flagged counterparties.",
+        "Reconcile central credit registry records with core transaction feeds.",
+      ],
+    };
+  } else if (
+    sector === "Retail Banking" ||
+    nameLower.includes("retail") ||
+    nameLower.includes("kyc")
+  ) {
+    template = {
+      title: "High-Risk Customer Onboarding Verification Gap",
+      type: "Compliance Risk",
+      risk: "High",
+      score: 81,
+      confidence: 88,
+      whyFlagged:
+        "Audit sampling identified 14 retail accounts opened without mandatory secondary biometric/PAN re-validation, exceeding the 2% regulatory tolerance threshold.",
+      observedPattern:
+        "14 out of 100 audited customer onboarding records lacked timestamped AML/KYC clearance before initial credit transaction.",
+      potentialCause:
+        "Branch onboarding staff used manual override during end-of-cycle customer acquisition drive.",
+      affectedControls: [
+        "Automated KYC document verification gateway",
+        "Branch manager sign-off on manual AML overrides",
+        "Pre-activation verification lock",
+      ],
+      riskImplication:
+        "Non-compliance with RBI Customer Due Diligence master directions, exposing the bank to AML penalties and synthetic identity fraud.",
+      causeChain: [
+        "Surge in retail account activations",
+        "Manual override applied on KYC verification queue",
+        "Absence of secondary document audit trail",
+        "Regulatory compliance threshold exceeded",
+      ],
+      recommendations: [
+        "Temporarily restrict debit privileges on the 14 flagged customer accounts.",
+        "Initiate 100% re-KYC and automated biometric verification for affected accounts.",
+        "Audit branch override logs for the past 30 days.",
+      ],
+    };
+  } else if (sector === "Treasury" || nameLower.includes("treasury") || nameLower.includes("fx")) {
+    template = {
+      title: "Off-Market FX Forward Rate Execution",
+      type: "Transaction Anomaly",
+      risk: "High",
+      score: 78,
+      confidence: 94,
+      whyFlagged:
+        "Three USD/INR forward contracts executed at exchange rates deviating by more than 18 bps from the interbank mid-rate at time of booking without documented dealer justification.",
+      observedPattern:
+        "Trade timestamps show execution rates at 84.12 vs interbank benchmark of 83.94 without logged market color or customer spread agreement.",
+      potentialCause:
+        "Manual deal slip booking without automated rate sanity checks in the legacy front-office system.",
+      affectedControls: [
+        "Real-time treasury rate feed sanity checks",
+        "Supervisory sign-off on rate variances >10 bps",
+        "End-of-day deal reconciliation",
+      ],
+      riskImplication:
+        "Unwarranted trading P&L drag and potential market conduct breach under treasury risk guidelines.",
+      causeChain: [
+        "Execution rate divergence from interbank benchmark",
+        "Missing supervisory approval tag in deal ticket",
+        "End-of-day rate tolerance check triggered",
+      ],
+      recommendations: [
+        "Request formal trade rationale and time-stamped market quotes from the dealer desk.",
+        "Recalculate MTM P&L impact on the 3 flagged forward contracts.",
+        "Enable mandatory deal capture validation blocking off-market trades without supervisor approval.",
+      ],
+    };
+  } else if (
+    sector === "SME Banking" ||
+    nameLower.includes("sme") ||
+    nameLower.includes("credit")
+  ) {
+    template = {
+      title: "Drawing Power Calculation Discrepancy",
+      type: "KPI Deviation",
+      risk: "Medium",
+      score: 68,
+      confidence: 87,
+      whyFlagged:
+        "Working capital drawing power for 6 SME cash-credit accounts was computed without deducting aged book debts (>90 days), resulting in INR 4.2 Cr unauthorized limit expansion.",
+      observedPattern:
+        "Quarterly debtor age analysis submitted by borrowers was not updated in the drawing power calculation sheet.",
+      potentialCause:
+        "Credit officer calculated drawing power using gross receivables rather than eligible net receivables.",
+      affectedControls: [
+        "Automated drawing power computation engine",
+        "Quarterly stock & debtor audit verification",
+        "Credit monitoring limit control",
+      ],
+      riskImplication:
+        "Uncollateralized credit exposure exceeding sanctioned drawing power, increasing non-performing asset risk.",
+      causeChain: [
+        "Aged debtors >90 days included in drawing power",
+        "Limit available exceeded eligible collateral value",
+        "Collateral coverage deficit triggered in quarterly review",
+      ],
+      recommendations: [
+        "Immediately recalculate drawing power for the 6 SME accounts deducting aged debts.",
+        "Notify borrowers to deposit margin shortfall within 7 business days.",
+        "Conduct portfolio-wide review of drawing power calculations across the SME branch book.",
+      ],
+    };
+  } else {
+    template = {
+      title: "Transaction Volume & Fee Accounting Mismatch",
+      type: "Reporting Mismatch",
+      risk: "High",
+      score: 84,
+      confidence: 89,
+      whyFlagged:
+        "Outbound payment transaction velocity rose 148% during the period while corresponding fee income ledgers remained flat, indicating a breakdown in automated fee accruals.",
+      observedPattern:
+        "Payment gateway settlement logs show 3,980 processed transactions with only 1,220 fee debit postings in the general ledger.",
+      potentialCause:
+        "Middleware fee calculation service timed out during peak transaction processing hours.",
+      affectedControls: [
+        "Gateway-to-general-ledger automated fee reconciliation",
+        "Middleware service timeout error logging",
+        "Daily unposted fee exception report",
+      ],
+      riskImplication: "Uncollected bank fee revenue and misstated operational financial records.",
+      causeChain: [
+        "Transaction volume surge in reporting window",
+        "Fee computation service dropout during peak batch",
+        "General ledger posting omitted without automated alert",
+      ],
+      recommendations: [
+        "Re-run batch fee calculation for all unposted transactions in the period.",
+        "Reconcile fee debit ledger against gateway transaction totals.",
+        "Deploy automated alert on fee posting latency exceeding 5 minutes.",
+      ],
+    };
+  }
+
+  const finding: Finding = {
+    id: findingId,
+    ref,
+    title: template.title,
+    branch: report.branch,
+    branchCode: report.branchCode,
+    sector: report.sector,
+    type: template.type,
+    risk: template.risk,
+    score: template.score,
+    confidence: template.confidence,
+    detected: "Just now",
+    status: "New",
+    reviewStage: "AI Suggested",
+    owner: "Unassigned",
+    whyFlagged: template.whyFlagged,
+    rootCause: {
+      observedPattern: template.observedPattern,
+      potentialCause: template.potentialCause,
+      affectedControls: template.affectedControls,
+      riskImplication: template.riskImplication,
+    },
+    causeChain: template.causeChain,
+    evidenceIds: [],
+    recommendations: template.recommendations,
+    reportId: report.id,
+  };
+
+  return finding;
 }
 
 export interface ReportAnalysisResult {
@@ -45,70 +284,19 @@ export interface ReportAnalysisResult {
   auditLogs: AuditLogEntry[];
 }
 
-function nextFindingRef(existingCount: number): string {
-  return `#${String(existingCount + 1).padStart(3, "0")}`;
-}
-
-/** Generate a realistic finding, evidence, remediation, notification and audit logs from a processed report. */
+/** Complete analysis generator for downstream multi-entity creation workflows. */
 export function generateAnalysisFromReport(
   report: BankReport,
   existingFindingCount: number,
 ): ReportAnalysisResult {
   const ts = Date.now();
-  const findingId = `f-${ts}`;
-  const ref = nextFindingRef(existingFindingCount);
-  const evId = `ev-${ts}`;
+  const finding = generateFindingFromReport(report, existingFindingCount);
   const docId = `doc-${ts}`;
+  const evId = `ev-${ts}`;
   const rmId = `rm-${ts}`;
 
   const page =
     report.documentPages.find((p) => p.highlight)?.page ?? report.documentPages[0]?.page ?? 7;
-
-  const finding: Finding = {
-    id: findingId,
-    ref,
-    title: "Unusual Loan Disbursement Pattern",
-    branch: report.branch,
-    branchCode: report.branchCode,
-    sector: report.sector,
-    type: "Loan Disbursement Anomaly",
-    risk: "Critical",
-    score: 92,
-    confidence: 91,
-    detected: "Just now",
-    status: "New",
-    reviewStage: "AI Suggested",
-    owner: "Unassigned",
-    whyFlagged:
-      "Transaction volume increased sharply while reported loan activity moved only modestly, creating a significant mismatch between observed activity and reported KPIs.",
-    rootCause: {
-      observedPattern:
-        "Outbound transaction volume rose materially week-on-week across multiple counterparties, while the reported loan-disbursement KPI moved only +28–31%.",
-      potentialCause:
-        "Discrepancy between transaction activity and reported loan-disbursement KPIs, consistent with disbursements booked outside the standard sanction workflow or delayed KPI reporting.",
-      affectedControls: [
-        "Sanction-letter to disbursement matching",
-        "Maker-checker on high-value transfers",
-        "Weekly KPI reconciliation",
-      ],
-      riskImplication:
-        "Unreconciled disbursements of this magnitude may conceal credit-limit breaches, misstated weekly KPIs, or unauthorised fund movement.",
-    },
-    causeChain: [
-      "Risk score increase",
-      "Transaction volume anomaly",
-      "High-value transfers increased",
-      "Mismatch with reported loan activity",
-      "Possible reporting / control failure",
-    ],
-    evidenceIds: [evId],
-    recommendations: [
-      "Review high-value transactions from the reporting period.",
-      "Verify supporting documentation for flagged loan disbursements.",
-      "Reconcile reported KPIs with transaction-level records.",
-    ],
-    reportId: report.id,
-  };
 
   const snippet =
     report.documentPages.find((p) => p.page === page)?.lines.join(" ") ??
@@ -122,7 +310,7 @@ export function generateAnalysisFromReport(
     locator: `Page ${page} · Transaction Summary`,
     page,
     snippet,
-    findingIds: [findingId],
+    findingIds: [finding.id],
   };
 
   const document: EvidenceDocument = {
@@ -134,29 +322,28 @@ export function generateAnalysisFromReport(
     date: "Just now",
     pages: report.pages,
     indexed: true,
-    linkedFindingIds: [findingId],
+    linkedFindingIds: [finding.id],
   };
 
   const remediation: RemediationAction = {
     id: rmId,
-    action:
-      "Review high-value transactions and verify sanction documentation for flagged disbursements",
-    findingId,
-    findingRef: ref,
-    risk: "Critical",
+    action: finding.recommendations[0] ?? "Review flagged transactions and verify documentation",
+    findingId: finding.id,
+    findingRef: finding.ref,
+    risk: finding.risk,
     owner: "Unassigned",
     dueDate: "29 Aug 2026",
     status: "Not Started",
-    priority: "P1",
+    priority: finding.risk === "Critical" ? "P1" : finding.risk === "High" ? "P2" : "P3",
   };
 
   const notification: AppNotification = {
     id: `n-${ts}`,
-    title: "Critical finding detected",
+    title: `${finding.risk} finding detected`,
     context: `Branch ${report.branchCode} · ${report.sector}`,
     time: "Just now",
-    severity: "Critical",
-    href: `/findings/${findingId}`,
+    severity: finding.risk,
+    href: `/findings/${finding.id}`,
     read: false,
   };
 
@@ -167,74 +354,49 @@ export function generateAnalysisFromReport(
       minute: "2-digit",
       second: "2-digit",
     });
+
   const auditLogs: AuditLogEntry[] = [
     {
-      id: `l-${ts}-1`,
+      id: `log-${ts}-1`,
       timestamp: now,
       workflow: "Report Ingestion",
-      agent: "Ingestion Agent",
-      action: "Report Uploaded",
+      agent: "DocumentParser",
+      action: "Extracted tables, metadata and text chunks",
       status: "Success",
       duration: "1.2s",
       report: report.name,
-      details: `Uploaded by ${report.uploadedBy}`,
+      details: `Parsed ${report.pages} pages, ${report.records} records across ${report.branch}.`,
     },
     {
-      id: `l-${ts}-2`,
+      id: `log-${ts}-2`,
       timestamp: now,
-      workflow: "Report Ingestion",
-      agent: "Parsing Agent",
-      action: "Report Parsed",
+      workflow: "Evidence Indexing",
+      agent: "VectorIndexer",
+      action: "Generated chunk embeddings & linked evidence citations",
       status: "Success",
-      duration: "3.8s",
+      duration: "0.8s",
       report: report.name,
-      details: `${report.pages} pages · ${report.records.toLocaleString()} records extracted`,
+      details: `Generated evidence locator Page ${page}.`,
     },
     {
-      id: `l-${ts}-3`,
+      id: `log-${ts}-3`,
       timestamp: now,
-      workflow: "Evidence Retrieval",
-      agent: "RAG Agent",
-      action: "Evidence Extracted",
+      workflow: "Risk Scoring",
+      agent: "AuditScoringAgent",
+      action: `Generated finding ${finding.ref}: ${finding.title}`,
       status: "Success",
-      duration: "2.4s",
+      duration: "1.6s",
       report: report.name,
-      details: `Page ${page} indexed · pgvector upsert complete`,
-    },
-    {
-      id: `l-${ts}-4`,
-      timestamp: now,
-      workflow: "Audit Analysis",
-      agent: "Audit Agent",
-      action: "AI Analysis Completed",
-      status: "Success",
-      duration: "4.6s",
-      report: report.name,
-      details: "Confidence 91% · transaction/KPI mismatch detected",
-    },
-    {
-      id: `l-${ts}-5`,
-      timestamp: now,
-      workflow: "Audit Analysis",
-      agent: "Reasoning Agent",
-      action: "Finding Created",
-      status: "Success",
-      duration: "1.8s",
-      report: report.name,
-      details: `${ref} Unusual Loan Disbursement Pattern · Critical · 92/100`,
-    },
-    {
-      id: `l-${ts}-6`,
-      timestamp: now,
-      workflow: "Remediation",
-      agent: "Remediation Agent",
-      action: "Remediation Created",
-      status: "Success",
-      duration: "1.1s",
-      report: report.name,
-      details: "P1 action drafted · pending auditor review",
+      details: `Risk score: ${finding.score}/100, AI confidence: ${finding.confidence}%.`,
     },
   ];
 
-  return { finding, evidenceRefs: [evidenceRef], document, remediation, notification, auditLogs };
+  return {
+    finding: { ...finding, evidenceIds: [evId] },
+    evidenceRefs: [evidenceRef],
+    document,
+    remediation,
+    notification,
+    auditLogs,
+  };
 }

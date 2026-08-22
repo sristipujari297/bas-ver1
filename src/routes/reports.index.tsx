@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { simulateIngestion, generateAnalysisFromReport } from "@/services/reportService";
+import { simulateIngestion, generateFindingFromReport } from "@/services/reportService";
 import { useAppStore } from "@/store/appStore";
 import { BRANCHES, SECTORS } from "@/data/mockData";
 import type { BankReport } from "@/lib/types";
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/reports/")({
 });
 
 function ReportsPage() {
-  const { reports, findings, addReport, updateReport, applyReportAnalysis } = useAppStore();
+  const { reports, findings, addReport, updateReport, addFinding } = useAppStore();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [dragging, setDragging] = useState(false);
@@ -115,12 +115,19 @@ function ReportsPage() {
       updateReport(id, { progress: tick.progress, status: tick.status });
       setUploadMessage(tick.progress === 100 ? null : tick.message);
       if (tick.progress === 100) {
-        const analysis = generateAnalysisFromReport(
+        const finding = generateFindingFromReport(
           { ...report, status: "Analysis Complete", progress: 100 },
           findings.length,
         );
-        applyReportAnalysis(id, analysis);
-        toast.success(`${fileName} analysed — finding ${analysis.finding.ref} created.`);
+        addFinding(finding);
+        updateReport(id, {
+          status: "Analysis Complete",
+          progress: 100,
+          findingIds: [finding.id],
+          aiSummary: finding.whyFlagged,
+          aiConfidence: finding.confidence,
+        });
+        toast.success(`${fileName} processed — finding ${finding.ref} created.`);
       }
     });
   };
