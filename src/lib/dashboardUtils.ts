@@ -1,4 +1,5 @@
 import { parse, subDays, isAfter, isBefore, startOfDay } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import { BRANCHES, riskTrend as baseRiskTrend } from "@/data/mockData";
 import type { BankReport, Finding } from "@/lib/types";
 
@@ -9,7 +10,8 @@ export function parseDemoDate(value: string): Date {
   if (value === "Just now" || value.startsWith("Just")) return DEMO_TODAY;
   const cleaned = value.replace(/,.*$/, "").trim();
   try {
-    return parse(cleaned, "d MMM yyyy", DEMO_TODAY);
+    const d = parse(cleaned, "d MMM yyyy", DEMO_TODAY);
+    return isNaN(d.getTime()) ? DEMO_TODAY : d;
   } catch {
     return DEMO_TODAY;
   }
@@ -17,42 +19,67 @@ export function parseDemoDate(value: string): Date {
 
 export type DateRangeKey = "this-week" | "last-week" | "last-30" | "custom";
 
-export function isInDateRange(date: Date, range: DateRangeKey): boolean {
+export type CustomDateRange = DateRange;
+
+export function isInDateRange(
+  date: Date,
+  range: DateRangeKey,
+  customRange?: CustomDateRange | undefined,
+): boolean {
+  const target = startOfDay(date);
   const today = startOfDay(DEMO_TODAY);
+
   if (range === "this-week") {
-    const start = subDays(today, 6);
-    return !isBefore(date, start) && !isAfter(date, today);
+    const start = subDays(today, 5); // Aug 17, 2026
+    return !isBefore(target, start) && !isAfter(target, today);
   }
+
   if (range === "last-week") {
-    const end = subDays(today, 7);
-    const start = subDays(today, 13);
-    return !isBefore(date, start) && !isAfter(date, end);
+    const start = subDays(today, 12); // Aug 10, 2026
+    const end = subDays(today, 6); // Aug 16, 2026
+    return !isBefore(target, start) && !isAfter(target, end);
   }
+
   if (range === "last-30") {
     const start = subDays(today, 29);
-    return !isBefore(date, start) && !isAfter(date, today);
+    return !isBefore(target, start) && !isAfter(target, today);
   }
+
+  if (range === "custom") {
+    if (!customRange || (!customRange.from && !customRange.to)) return true;
+    if (customRange.from && isBefore(target, startOfDay(customRange.from))) return false;
+    if (customRange.to && isAfter(target, startOfDay(customRange.to))) return false;
+    return true;
+  }
+
   return true;
 }
 
-export function filterFindings(
-  findings: Finding[],
-  opts: { branch?: string; sector?: string; range?: DateRangeKey },
-): Finding[] {
+export interface DashboardFilterOptions {
+  branch?: string | undefined;
+  sector?: string | undefined;
+  range?: DateRangeKey | undefined;
+  customRange?: CustomDateRange | undefined;
+}
+
+export function filterFindings(findings: Finding[], opts: DashboardFilterOptions): Finding[] {
   return findings.filter((f) => {
     if (opts.branch && opts.branch !== "all" && f.branchCode !== opts.branch) return false;
     if (opts.sector && opts.sector !== "all" && f.sector !== opts.sector) return false;
+    if (opts.range && !isInDateRange(parseDemoDate(f.detected), opts.range, opts.customRange)) {
+      return false;
+    }
     return true;
   });
 }
 
-export function filterReports(
-  reports: BankReport[],
-  opts: { branch?: string; sector?: string; range?: DateRangeKey },
-): BankReport[] {
+export function filterReports(reports: BankReport[], opts: DashboardFilterOptions): BankReport[] {
   return reports.filter((r) => {
     if (opts.branch && opts.branch !== "all" && r.branchCode !== opts.branch) return false;
     if (opts.sector && opts.sector !== "all" && r.sector !== opts.sector) return false;
+    if (opts.range && !isInDateRange(parseDemoDate(r.uploadedAt), opts.range, opts.customRange)) {
+      return false;
+    }
     return true;
   });
 }
@@ -154,6 +181,7 @@ export function computeKpis(
 export function generateDashboardInsight(
   branch: string,
   sector: string,
+  range: DateRangeKey,
   findings: Finding[],
   reports: BankReport[],
 ): string {
@@ -161,13 +189,23 @@ export function generateDashboardInsight(
   const critical = active.filter((f) => f.risk === "Critical");
   const high = active.filter((f) => f.risk === "High");
 
-  if (branch === "all" && sector === "all") {
+  const branchLabel = branch !== "all" ? `Branch ${branch}` : null;
+  const sectorLabel = sector !== "all" ? sector : null;
+  const rangeLabel =
+    range === "last-week"
+      ? "Prior week"
+      : range === "last-30"
+        ? "Last 30 days"
+        : range === "custom"
+          ? "Custom period"
+          : null;
+
+  if (branch === "all" && sector === "all" && range === "this-week") {
     return "Overall risk increased 14% this week, primarily driven by transaction anomalies in Corporate Lending and two branch-level reporting mismatches.";
   }
 
-  const branchLabel = branch !== "all" ? `Branch ${branch}` : null;
-  const sectorLabel = sector !== "all" ? sector : null;
-  const context = [branchLabel, sectorLabel].filter(Boolean).join(" · ");
+  const context =
+    [rangeLabel, branchLabel, sectorLabel].filter(Boolean).join(" · ") || "Selected filters";
 
   if (active.length === 0) {
     return `No active findings detected for ${context}. Audit telemetry indicates nominal compliance across all evaluated checkpoints.`;

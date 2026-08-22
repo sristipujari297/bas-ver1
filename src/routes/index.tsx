@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarIcon, Sparkles } from "lucide-react";
+import { format, subDays } from "date-fns";
 import { PageHeader, Panel } from "@/components/audit/SectionHeader";
 import { KpiCard } from "@/components/audit/KpiCard";
 import { RiskBadge } from "@/components/audit/RiskBadge";
@@ -8,6 +9,8 @@ import { FindingsTable } from "@/components/audit/FindingsTable";
 import { AuditPipeline } from "@/components/audit/AuditPipeline";
 import { RiskTrendChart, type RiskMetric } from "@/components/audit/charts";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -17,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { BRANCHES, SECTORS } from "@/data/mockData";
 import { useAppStore } from "@/store/appStore";
+import { cn } from "@/lib/utils";
 import {
   computeFilteredRiskTrend,
   computeKpis,
@@ -24,6 +28,8 @@ import {
   filterReports,
   generateDashboardInsight,
   isActiveFinding,
+  DEMO_TODAY,
+  type CustomDateRange,
   type DateRangeKey,
 } from "@/lib/dashboardUtils";
 
@@ -50,10 +56,18 @@ function Overview() {
   const { findings, reports } = useAppStore();
   const [metric, setMetric] = useState<RiskMetric>("count");
   const [range, setRange] = useState<DateRangeKey>("this-week");
+  const [customRange, setCustomRange] = useState<CustomDateRange | undefined>({
+    from: subDays(DEMO_TODAY, 14),
+    to: DEMO_TODAY,
+  });
+  const [customOpen, setCustomOpen] = useState(false);
   const [branch, setBranch] = useState("all");
   const [sector, setSector] = useState("all");
 
-  const filterOpts = useMemo(() => ({ branch, sector }), [branch, sector]);
+  const filterOpts = useMemo(
+    () => ({ branch, sector, range, customRange }),
+    [branch, sector, range, customRange],
+  );
 
   const filteredFindings = useMemo(
     () => filterFindings(findings, filterOpts),
@@ -72,8 +86,8 @@ function Overview() {
   );
 
   const currentInsight = useMemo(
-    () => generateDashboardInsight(branch, sector, filteredFindings, filteredReports),
-    [branch, sector, filteredFindings, filteredReports],
+    () => generateDashboardInsight(branch, sector, range, filteredFindings, filteredReports),
+    [branch, sector, range, filteredFindings, filteredReports],
   );
 
   const alerts = useMemo(
@@ -93,7 +107,16 @@ function Overview() {
         subtitle="Weekly audit intelligence and risk overview"
         actions={
           <>
-            <Select value={range} onValueChange={(v) => setRange(v as DateRangeKey)}>
+            <Select
+              value={range}
+              onValueChange={(v) => {
+                const nextRange = v as DateRangeKey;
+                setRange(nextRange);
+                if (nextRange === "custom") {
+                  setCustomOpen(true);
+                }
+              }}
+            >
               <SelectTrigger className="w-40" aria-label="Date range">
                 <SelectValue />
               </SelectTrigger>
@@ -104,6 +127,46 @@ function Overview() {
                 <SelectItem value="custom">Custom Range</SelectItem>
               </SelectContent>
             </Select>
+
+            {range === "custom" && (
+              <Popover open={customOpen} onOpenChange={setCustomOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-9 justify-start text-left font-normal text-xs",
+                      !customRange?.from && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-1.5 size-3.5" />
+                    {customRange?.from ? (
+                      customRange.to ? (
+                        <>
+                          {format(customRange.from, "d MMM")} –{" "}
+                          {format(customRange.to, "d MMM yyyy")}
+                        </>
+                      ) : (
+                        format(customRange.from, "d MMM yyyy")
+                      )
+                    ) : (
+                      <span>Pick dates</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={customRange?.from ?? DEMO_TODAY}
+                    selected={customRange}
+                    onSelect={(r) => setCustomRange(r)}
+                    numberOfMonths={1}
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+
             <Select value={branch} onValueChange={setBranch}>
               <SelectTrigger className="w-44" aria-label="Branch filter">
                 <SelectValue placeholder="All branches" />
