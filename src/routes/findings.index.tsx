@@ -17,7 +17,14 @@ import { BRANCHES, FINDING_TYPES, SECTORS } from "@/data/mockData";
 import type { RiskLevel } from "@/lib/types";
 
 const RISKS: RiskLevel[] = ["Critical", "High", "Medium", "Low"];
-const STATUSES = ["New", "Under Review", "Confirmed", "Remediation Pending", "Resolved", "Dismissed"];
+const STATUSES = [
+  "New",
+  "Under Review",
+  "Confirmed",
+  "Remediation Pending",
+  "Resolved",
+  "Dismissed",
+];
 
 export const Route = createFileRoute("/findings/")({
   head: () => ({
@@ -52,7 +59,11 @@ function FindingsPage() {
     const q = query.trim().toLowerCase();
     const rows = findings.filter(
       (f) =>
-        (!q || [f.ref, f.title, f.branch, f.branchCode, f.sector, f.type].join(" ").toLowerCase().includes(q)) &&
+        (!q ||
+          [f.ref, f.title, f.branch, f.branchCode, f.sector, f.type]
+            .join(" ")
+            .toLowerCase()
+            .includes(q)) &&
         (risk === "all" || f.risk === risk) &&
         (branch === "all" || f.branchCode === branch) &&
         (sector === "all" || f.sector === sector) &&
@@ -60,7 +71,11 @@ function FindingsPage() {
         (status === "all" || f.status === status),
     );
     return [...rows].sort((a, b) =>
-      sort === "score" ? b.score - a.score : sort === "confidence" ? b.confidence - a.confidence : a.ref.localeCompare(b.ref),
+      sort === "score"
+        ? b.score - a.score
+        : sort === "confidence"
+          ? b.confidence - a.confidence
+          : a.ref.localeCompare(b.ref),
     );
   }, [findings, query, risk, branch, sector, type, status, sort]);
 
@@ -92,7 +107,10 @@ function FindingsPage() {
       >
         <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden />
+            <Search
+              className="absolute left-2.5 top-2.5 size-4 text-muted-foreground"
+              aria-hidden
+            />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -101,7 +119,13 @@ function FindingsPage() {
               aria-label="Search findings"
             />
           </div>
-          <FilterSelect label="Risk" value={risk} onChange={setRisk} options={RISKS} allLabel="All risk levels" />
+          <FilterSelect
+            label="Risk"
+            value={risk}
+            onChange={setRisk}
+            options={RISKS}
+            allLabel="All risk levels"
+          />
           <FilterSelect
             label="Branch"
             value={branch}
@@ -109,9 +133,27 @@ function FindingsPage() {
             options={BRANCHES.map((b) => b.code)}
             allLabel="All branches"
           />
-          <FilterSelect label="Sector" value={sector} onChange={setSector} options={SECTORS} allLabel="All sectors" />
-          <FilterSelect label="Type" value={type} onChange={setType} options={FINDING_TYPES} allLabel="All types" />
-          <FilterSelect label="Status" value={status} onChange={setStatus} options={STATUSES} allLabel="All statuses" />
+          <FilterSelect
+            label="Sector"
+            value={sector}
+            onChange={setSector}
+            options={SECTORS}
+            allLabel="All sectors"
+          />
+          <FilterSelect
+            label="Type"
+            value={type}
+            onChange={setType}
+            options={FINDING_TYPES}
+            allLabel="All types"
+          />
+          <FilterSelect
+            label="Status"
+            value={status}
+            onChange={setStatus}
+            options={STATUSES}
+            allLabel="All statuses"
+          />
           <Select value={sort} onValueChange={setSort}>
             <SelectTrigger className="h-9 w-40 text-xs" aria-label="Sort findings">
               <SelectValue />
@@ -125,7 +167,18 @@ function FindingsPage() {
         </div>
         <FindingsTable
           findings={filtered}
-          columns={["finding", "branch", "sector", "risk", "score", "confidence", "evidence", "detected", "status", "owner"]}
+          columns={[
+            "finding",
+            "branch",
+            "sector",
+            "risk",
+            "score",
+            "confidence",
+            "evidence",
+            "detected",
+            "status",
+            "owner",
+          ]}
         />
       </Panel>
     </div>

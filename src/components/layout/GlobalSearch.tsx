@@ -6,7 +6,13 @@ import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/audit/SectionHeader";
 import { useAppStore } from "@/store/appStore";
 
-export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function GlobalSearch({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const [query, setQuery] = useState("Branch 042");
   const navigate = useNavigate();
   const { reports, findings, documents } = useAppStore();
@@ -39,7 +45,10 @@ export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChan
         </DialogHeader>
         <div className="border-b border-border p-3">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden />
+            <Search
+              className="absolute left-2.5 top-2.5 size-4 text-muted-foreground"
+              aria-hidden
+            />
             <Input
               autoFocus
               value={query}
@@ -57,7 +66,12 @@ export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChan
             <div className="space-y-3">
               <Group title="Reports" icon={<FileText className="size-3.5" />}>
                 {results.reports.map((r) => (
-                  <Row key={r.id} onClick={() => go(`/reports/${r.id}`)} title={r.name} meta={`${r.branch} · ${r.sector}`} />
+                  <Row
+                    key={r.id}
+                    onClick={() => go(`/reports/${r.id}`)}
+                    title={r.name}
+                    meta={`${r.branch} · ${r.sector}`}
+                  />
                 ))}
               </Group>
               <Group title="Findings" icon={<ShieldAlert className="size-3.5" />}>
@@ -72,7 +86,12 @@ export function GlobalSearch({ open, onOpenChange }: { open: boolean; onOpenChan
               </Group>
               <Group title="Evidence" icon={<FileSearch className="size-3.5" />}>
                 {results.evidence.map((d) => (
-                  <Row key={d.id} onClick={() => go("/evidence")} title={d.name} meta={`${d.branch} · ${d.date}`} />
+                  <Row
+                    key={d.id}
+                    onClick={() => go("/evidence")}
+                    title={d.name}
+                    meta={`${d.branch} · ${d.date}`}
+                  />
                 ))}
               </Group>
             </div>

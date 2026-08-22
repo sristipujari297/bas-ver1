@@ -41,9 +41,21 @@ function SettingsPage() {
 
       <Panel title="Notifications" bodyClassName="space-y-4">
         {[
-          { id: "critical", label: "Critical finding alerts", desc: "Notify immediately when a critical risk is detected." },
-          { id: "weekly", label: "Weekly audit digest", desc: "Summary of new findings and remediation progress." },
-          { id: "overdue", label: "Overdue remediation reminders", desc: "Alert owners when actions pass their due date." },
+          {
+            id: "critical",
+            label: "Critical finding alerts",
+            desc: "Notify immediately when a critical risk is detected.",
+          },
+          {
+            id: "weekly",
+            label: "Weekly audit digest",
+            desc: "Summary of new findings and remediation progress.",
+          },
+          {
+            id: "overdue",
+            label: "Overdue remediation reminders",
+            desc: "Alert owners when actions pass their due date.",
+          },
         ].map((n, i) => (
           <div key={n.id} className="flex items-start justify-between gap-4">
             <div>
@@ -57,7 +69,10 @@ function SettingsPage() {
         ))}
       </Panel>
 
-      <Panel title="Demo Data" description="Reset findings, reports and remediation to their seeded state">
+      <Panel
+        title="Demo Data"
+        description="Reset findings, reports and remediation to their seeded state"
+      >
         <Button
           variant="outline"
           onClick={() => {

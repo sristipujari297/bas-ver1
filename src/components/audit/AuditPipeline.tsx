@@ -27,7 +27,9 @@ export function AuditPipeline() {
                   <s.Icon className="size-3.5" aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-foreground">{stage.label}</span>
+                  <span className="block truncate text-sm font-medium text-foreground">
+                    {stage.label}
+                  </span>
                   <span className="block text-[11px] text-muted-foreground">{stage.agent}</span>
                 </span>
                 <ChevronDown className="size-4 shrink-0 text-muted-foreground" aria-hidden />

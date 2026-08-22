@@ -35,7 +35,8 @@ export const Route = createFileRoute("/findings/$id")({
 
 function FindingDetail() {
   const { id } = useParams({ from: "/findings/$id" });
-  const { findings, evidence, remediation, updateFindingStatus, assignFindingOwner } = useAppStore();
+  const { findings, evidence, remediation, updateFindingStatus, assignFindingOwner } =
+    useAppStore();
   const finding = findings.find((f) => f.id === id);
   const [note, setNote] = useState("");
 
@@ -79,13 +80,22 @@ function FindingDetail() {
       />
 
       <Panel bodyClassName="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetaItem label="Risk score" value={<span className="num font-semibold">{finding.score}/100</span>} />
-        <MetaItem label="AI confidence" value={<ConfidenceIndicator value={finding.confidence} />} />
+        <MetaItem
+          label="Risk score"
+          value={<span className="num font-semibold">{finding.score}/100</span>}
+        />
+        <MetaItem
+          label="AI confidence"
+          value={<ConfidenceIndicator value={finding.confidence} />}
+        />
         <MetaItem label="Detected" value={finding.detected} />
         <MetaItem label="Owner" value={finding.owner} />
       </Panel>
 
-      <Panel title="Human-in-the-Loop Status" description="AI findings are advisory until an auditor confirms them">
+      <Panel
+        title="Human-in-the-Loop Status"
+        description="AI findings are advisory until an auditor confirms them"
+      >
         <HumanInLoopTrack stage={finding.reviewStage} />
       </Panel>
 
@@ -105,13 +115,19 @@ function FindingDetail() {
                 <Sparkles className="size-3.5" aria-hidden />
                 AI explanation
               </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-foreground">{finding.whyFlagged}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-foreground">
+                {finding.whyFlagged}
+              </p>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
               Every statement above is traceable to a source document in the Evidence tab.
             </p>
           </Panel>
-          <Panel title="Linked Evidence" description={`${linkedEvidence.length} source references`} bodyClassName="space-y-2 p-3">
+          <Panel
+            title="Linked Evidence"
+            description={`${linkedEvidence.length} source references`}
+            bodyClassName="space-y-2 p-3"
+          >
             {linkedEvidence.slice(0, 2).map((e) => (
               <EvidenceCard key={e.id} evidence={e} compact />
             ))}
@@ -127,7 +143,10 @@ function FindingDetail() {
               value={
                 <ul className="mt-1 space-y-1">
                   {finding.rootCause.affectedControls.map((c) => (
-                    <li key={c} className="rounded-md border border-border bg-muted px-2 py-1 text-xs">
+                    <li
+                      key={c}
+                      className="rounded-md border border-border bg-muted px-2 py-1 text-xs"
+                    >
                       {c}
                     </li>
                   ))}
@@ -142,9 +161,16 @@ function FindingDetail() {
         </TabsContent>
 
         <TabsContent value="evidence" className="mt-4">
-          <Panel title="Evidence Trail" description="Source documents supporting this finding" bodyClassName="grid gap-3 lg:grid-cols-2">
+          <Panel
+            title="Evidence Trail"
+            description="Source documents supporting this finding"
+            bodyClassName="grid gap-3 lg:grid-cols-2"
+          >
             {linkedEvidence.length === 0 ? (
-              <EmptyState title="No evidence linked" description="This finding was raised without a source reference." />
+              <EmptyState
+                title="No evidence linked"
+                description="This finding was raised without a source reference."
+              />
             ) : (
               linkedEvidence.map((e) => (
                 <EvidenceCard
@@ -160,15 +186,25 @@ function FindingDetail() {
         <TabsContent value="remediation" className="mt-4 grid gap-4 lg:grid-cols-2">
           <Panel title="Recommended Actions" bodyClassName="space-y-2">
             {finding.recommendations.map((r) => (
-              <div key={r} className="flex items-start gap-2 rounded-md border border-border bg-card p-2.5 text-sm">
+              <div
+                key={r}
+                className="flex items-start gap-2 rounded-md border border-border bg-card p-2.5 text-sm"
+              >
                 <ClipboardList className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
                 <span>{r}</span>
               </div>
             ))}
           </Panel>
-          <Panel title="Tracked Remediation" description={`${actions.length} actions in the tracker`} bodyClassName="space-y-2">
+          <Panel
+            title="Tracked Remediation"
+            description={`${actions.length} actions in the tracker`}
+            bodyClassName="space-y-2"
+          >
             {actions.length === 0 ? (
-              <EmptyState title="No remediation actions yet" description="Confirm the finding to generate actions." />
+              <EmptyState
+                title="No remediation actions yet"
+                description="Confirm the finding to generate actions."
+              />
             ) : (
               actions.map((a) => (
                 <div key={a.id} className="rounded-md border border-border bg-card p-2.5">

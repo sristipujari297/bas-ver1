@@ -48,9 +48,21 @@ function LoginPage() {
           </p>
           <dl className="mt-10 space-y-4">
             {[
-              { Icon: Workflow, t: "Continuous audit pipeline", d: "Ingestion → retrieval → analysis → root cause → remediation." },
-              { Icon: FileSearch, t: "Evidence traceability", d: "Every finding links back to a document, page, sheet or row." },
-              { Icon: Lock, t: "On-premise processing", d: "Local LLM runtime, no external document sharing." },
+              {
+                Icon: Workflow,
+                t: "Continuous audit pipeline",
+                d: "Ingestion → retrieval → analysis → root cause → remediation.",
+              },
+              {
+                Icon: FileSearch,
+                t: "Evidence traceability",
+                d: "Every finding links back to a document, page, sheet or row.",
+              },
+              {
+                Icon: Lock,
+                t: "On-premise processing",
+                d: "Local LLM runtime, no external document sharing.",
+              },
             ].map(({ Icon, t, d }) => (
               <div key={t} className="flex gap-3">
                 <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-md bg-white/10 text-primary-foreground">
@@ -73,7 +85,9 @@ function LoginPage() {
       <section className="flex items-center justify-center px-6 py-12">
         <div className="panel w-full max-w-sm p-6">
           <h2 className="text-lg font-semibold text-foreground">Sign in</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Use your bank audit department credentials.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Use your bank audit department credentials.
+          </p>
 
           <form
             className="mt-6 space-y-4"
@@ -84,11 +98,21 @@ function LoginPage() {
           >
             <div className="space-y-1.5">
               <Label htmlFor="email">Work Email</Label>
-              <Input id="email" type="email" placeholder="analyst@bank.co.in" defaultValue="m.shah@bank.co.in" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="analyst@bank.co.in"
+                defaultValue="m.shah@bank.co.in"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" defaultValue="demo-password" />
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                defaultValue="demo-password"
+              />
             </div>
             <Button type="submit" className="w-full gap-1.5">
               Sign In

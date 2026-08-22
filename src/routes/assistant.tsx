@@ -56,7 +56,11 @@ function AssistantPage() {
       />
 
       <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-        <Panel title="Conversation" description="On-premise model · no data leaves the bank" bodyClassName="flex flex-col gap-3 p-3">
+        <Panel
+          title="Conversation"
+          description="On-premise model · no data leaves the bank"
+          bodyClassName="flex flex-col gap-3 p-3"
+        >
           <div className="min-h-[26rem] space-y-3">
             {chat.length === 0 && !loading && (
               <EmptyState
@@ -113,15 +117,28 @@ function AssistantPage() {
               aria-label="Ask the audit assistant"
               className="h-10 text-sm"
             />
-            <Button type="submit" size="icon" className="size-10 shrink-0" disabled={loading} aria-label="Send question">
+            <Button
+              type="submit"
+              size="icon"
+              className="size-10 shrink-0"
+              disabled={loading}
+              aria-label="Send question"
+            >
               <SendHorizonal className="size-4" aria-hidden />
             </Button>
           </form>
         </Panel>
 
-        <Panel title="Evidence Panel" description="Sources cited in the latest answer" bodyClassName="space-y-2 p-3">
+        <Panel
+          title="Evidence Panel"
+          description="Sources cited in the latest answer"
+          bodyClassName="space-y-2 p-3"
+        >
           {panelEvidence.length === 0 ? (
-            <EmptyState title="No citations yet" description="Ask a question to populate the evidence panel." />
+            <EmptyState
+              title="No citations yet"
+              description="Ask a question to populate the evidence panel."
+            />
           ) : (
             panelEvidence.map((e) => <EvidenceCard key={e.id} evidence={e} compact />)
           )}
@@ -142,7 +159,10 @@ function AnswerCard({ response }: { response: AIResponse }) {
       <p className="text-sm leading-relaxed text-foreground">{response.summary}</p>
       <ul className="space-y-1">
         {response.keyFindings.map((k) => (
-          <li key={k} className="rounded-md border border-border bg-muted/60 px-2.5 py-1.5 text-xs text-foreground">
+          <li
+            key={k}
+            className="rounded-md border border-border bg-muted/60 px-2.5 py-1.5 text-xs text-foreground"
+          >
             {k}
           </li>
         ))}
@@ -152,11 +172,15 @@ function AnswerCard({ response }: { response: AIResponse }) {
         {typeof response.riskScore === "number" && (
           <span className="num text-xs text-muted-foreground">Score {response.riskScore}/100</span>
         )}
-        {typeof response.confidence === "number" && <ConfidenceIndicator value={response.confidence} compact />}
+        {typeof response.confidence === "number" && (
+          <ConfidenceIndicator value={response.confidence} compact />
+        )}
       </div>
       {response.recommendations && response.recommendations.length > 0 && (
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Recommended next steps</p>
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Recommended next steps
+          </p>
           <ul className="mt-1 space-y-1 text-xs text-foreground">
             {response.recommendations.map((r) => (
               <li key={r}>• {r}</li>

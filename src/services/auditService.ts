@@ -7,6 +7,7 @@ import {
   notifications,
   pipelineStages,
   remediationActions,
+  reports,
   riskDistribution,
   riskDomains,
   riskTrend,
@@ -15,6 +16,7 @@ import {
 import type {
   AppNotification,
   AuditLogEntry,
+  BankReport,
   EvidenceDocument,
   EvidenceRef,
   Finding,
@@ -74,12 +76,13 @@ export function getAnalytics() {
   };
 }
 
+/** @deprecated Use computeKpis from @/lib/dashboardUtils with live store data instead. */
 export const kpis = [
   {
     id: "reports",
     label: "Total Reports",
-    value: "128",
-    subtitle: "+12% from last week",
+    value: String(reports.length),
+    subtitle: "Derived from report register",
     icon: "FileText",
     tone: "navy" as const,
     href: "/reports",
@@ -87,8 +90,10 @@ export const kpis = [
   {
     id: "findings",
     label: "Active Findings",
-    value: "12",
-    subtitle: "4 require immediate attention",
+    value: String(
+      findings.filter((f) => f.status !== "Resolved" && f.status !== "Dismissed").length,
+    ),
+    subtitle: "Derived from findings register",
     icon: "AlertTriangle",
     tone: "high" as const,
     href: "/findings",
@@ -96,8 +101,12 @@ export const kpis = [
   {
     id: "critical",
     label: "Critical Risks",
-    value: "4",
-    subtitle: "2 newly detected",
+    value: String(
+      findings.filter(
+        (f) => f.risk === "Critical" && f.status !== "Resolved" && f.status !== "Dismissed",
+      ).length,
+    ),
+    subtitle: "Open critical findings",
     icon: "ShieldAlert",
     tone: "critical" as const,
     href: "/findings?risk=Critical",
@@ -105,8 +114,8 @@ export const kpis = [
   {
     id: "coverage",
     label: "Audit Coverage",
-    value: "86%",
-    subtitle: "Across 24 branches",
+    value: `${Math.round((new Set(reports.map((r) => r.branchCode)).size / 8) * 100)}%`,
+    subtitle: "Branch coverage from reports",
     icon: "Target",
     tone: "teal" as const,
     href: "/audit-intelligence",

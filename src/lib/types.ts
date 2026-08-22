@@ -1,12 +1,7 @@
 export type RiskLevel = "Critical" | "High" | "Medium" | "Low";
 
 export type FindingStatus =
-  | "New"
-  | "Under Review"
-  | "Confirmed"
-  | "Remediation Pending"
-  | "Resolved"
-  | "Dismissed";
+  "New" | "Under Review" | "Confirmed" | "Remediation Pending" | "Resolved" | "Dismissed";
 
 export type FindingType =
   | "Transaction Anomaly"
@@ -18,25 +13,13 @@ export type FindingType =
   | "KPI Deviation";
 
 export type ReportStatus =
-  | "Uploaded"
-  | "Parsing"
-  | "Processing"
-  | "Indexed"
-  | "Analysis Complete"
-  | "Failed";
+  "Uploaded" | "Parsing" | "Processing" | "Indexed" | "Analysis Complete" | "Failed";
 
 export type RemediationStatus =
-  | "Not Started"
-  | "In Progress"
-  | "Pending Verification"
-  | "Completed"
-  | "Overdue";
+  "Not Started" | "In Progress" | "Pending Verification" | "Completed" | "Overdue";
 
 export type ReviewStage =
-  | "AI Suggested"
-  | "Pending Auditor Review"
-  | "Auditor Confirmed"
-  | "Remediation Approved";
+  "AI Suggested" | "Pending Auditor Review" | "Auditor Confirmed" | "Remediation Approved";
 
 export interface EvidenceRef {
   id: string;

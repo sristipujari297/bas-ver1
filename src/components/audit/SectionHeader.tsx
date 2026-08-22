@@ -87,7 +87,9 @@ export function LoadingState({ label = "Analyzing audit evidence..." }: { label?
 export function MetaItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
-      <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dt className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
       <dd className="mt-1 text-sm text-foreground">{value}</dd>
     </div>
   );

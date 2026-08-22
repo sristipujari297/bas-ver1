@@ -56,7 +56,9 @@ export function RiskScore({
       <span className={cn("num font-semibold", color, size === "lg" ? "text-5xl" : "text-base")}>
         {score}
       </span>
-      <span className={cn("text-muted-foreground", size === "lg" ? "text-lg" : "text-xs")}>/100</span>
+      <span className={cn("text-muted-foreground", size === "lg" ? "text-lg" : "text-xs")}>
+        /100
+      </span>
     </div>
   );
 }

@@ -41,7 +41,11 @@ function LogsPage() {
     const q = query.trim().toLowerCase();
     return logs.filter(
       (l) =>
-        (!q || [l.workflow, l.agent, l.action, l.report, l.details].join(" ").toLowerCase().includes(q)) &&
+        (!q ||
+          [l.workflow, l.agent, l.action, l.report, l.details]
+            .join(" ")
+            .toLowerCase()
+            .includes(q)) &&
         (status === "all" || l.status === status),
     );
   }, [logs, query, status]);
@@ -54,7 +58,10 @@ function LogsPage() {
         actions={
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden />
+              <Search
+                className="absolute left-2.5 top-2.5 size-4 text-muted-foreground"
+                aria-hidden
+              />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -79,7 +86,11 @@ function LogsPage() {
         }
       />
 
-      <Panel title="Workflow Activity" description={`${filtered.length} of ${logs.length} entries`} bodyClassName="p-0">
+      <Panel
+        title="Workflow Activity"
+        description={`${filtered.length} of ${logs.length} entries`}
+        bodyClassName="p-0"
+      >
         {filtered.length === 0 ? (
           <EmptyState title="No log entries match your filters." />
         ) : (
@@ -87,7 +98,16 @@ function LogsPage() {
             <table className="w-full min-w-[980px] text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  {["Timestamp", "Workflow", "Agent", "Action", "Report", "Duration", "Status", "Details"].map((h) => (
+                  {[
+                    "Timestamp",
+                    "Workflow",
+                    "Agent",
+                    "Action",
+                    "Report",
+                    "Duration",
+                    "Status",
+                    "Details",
+                  ].map((h) => (
                     <th key={h} className="px-3 py-2 font-medium">
                       {h}
                     </th>
@@ -97,12 +117,20 @@ function LogsPage() {
               <tbody className="divide-y divide-border">
                 {filtered.map((l) => (
                   <tr key={l.id} className="hover:bg-muted/60">
-                    <td className="num px-3 py-2.5 whitespace-nowrap text-muted-foreground">{l.timestamp}</td>
+                    <td className="num px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {l.timestamp}
+                    </td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-foreground">{l.workflow}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{l.agent}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {l.agent}
+                    </td>
                     <td className="px-3 py-2.5 text-foreground">{l.action}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{l.report}</td>
-                    <td className="num px-3 py-2.5 whitespace-nowrap text-muted-foreground">{l.duration}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {l.report}
+                    </td>
+                    <td className="num px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {l.duration}
+                    </td>
                     <td className="px-3 py-2.5">
                       <StatusBadge status={l.status} />
                     </td>

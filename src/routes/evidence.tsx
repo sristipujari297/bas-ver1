@@ -63,7 +63,10 @@ function EvidencePage() {
         actions={
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden />
+              <Search
+                className="absolute left-2.5 top-2.5 size-4 text-muted-foreground"
+                aria-hidden
+              />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -90,7 +93,11 @@ function EvidencePage() {
       />
 
       <div className="grid gap-4 lg:grid-cols-[20rem_1fr]">
-        <Panel title="Indexed Documents" description={`${filteredDocs.length} documents`} bodyClassName="space-y-2 p-3">
+        <Panel
+          title="Indexed Documents"
+          description={`${filteredDocs.length} documents`}
+          bodyClassName="space-y-2 p-3"
+        >
           {filteredDocs.length === 0 ? (
             <EmptyState title="No documents match your search." />
           ) : (
@@ -103,14 +110,18 @@ function EvidencePage() {
                   onClick={() => setSelected(d.id)}
                   className={cn(
                     "flex w-full items-start gap-2.5 rounded-lg border p-2.5 text-left transition-colors",
-                    active ? "border-primary/40 bg-accent/60" : "border-border bg-card hover:bg-muted/60",
+                    active
+                      ? "border-primary/40 bg-accent/60"
+                      : "border-border bg-card hover:bg-muted/60",
                   )}
                 >
                   <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-md bg-info-soft text-navy">
                     <Icon className="size-4" aria-hidden />
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-foreground">{d.name}</span>
+                    <span className="block truncate text-sm font-medium text-foreground">
+                      {d.name}
+                    </span>
                     <span className="block text-xs text-muted-foreground">
                       {d.branch} · {d.date}
                     </span>
@@ -127,25 +138,40 @@ function EvidencePage() {
         <div className="space-y-4">
           <Panel
             title={doc ? doc.name : "Document"}
-            description={doc ? `${doc.sector} · ${doc.branch} · ${doc.indexed ? "Indexed for retrieval" : "Not indexed"}` : ""}
+            description={
+              doc
+                ? `${doc.sector} · ${doc.branch} · ${doc.indexed ? "Indexed for retrieval" : "Not indexed"}`
+                : ""
+            }
             bodyClassName="space-y-3 p-3"
           >
             {!doc ? (
-              <EmptyState title="Select a document" description="Choose a document to inspect its evidence references." />
+              <EmptyState
+                title="Select a document"
+                description="Choose a document to inspect its evidence references."
+              />
             ) : refs.length === 0 ? (
-              <EmptyState title="No evidence references" description="No finding cites this document yet." />
+              <EmptyState
+                title="No evidence references"
+                description="No finding cites this document yet."
+              />
             ) : (
               refs.map((e) => (
                 <div key={e.id} className="space-y-2">
                   <EvidenceCard evidence={e} />
                   <div className="flex flex-wrap items-center gap-1.5 pl-1">
-                    <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Cited by</span>
+                    <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      Cited by
+                    </span>
                     {e.findingIds.map((fid) => {
                       const f = findings.find((x) => x.id === fid);
                       if (!f) return null;
                       return (
                         <Link key={fid} to="/findings/$id" params={{ id: fid }}>
-                          <Badge variant="outline" className="text-[11px] font-normal hover:bg-accent">
+                          <Badge
+                            variant="outline"
+                            className="text-[11px] font-normal hover:bg-accent"
+                          >
                             {f.ref} {f.title}
                           </Badge>
                         </Link>

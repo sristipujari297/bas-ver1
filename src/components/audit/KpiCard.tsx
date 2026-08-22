@@ -34,7 +34,9 @@ export function KpiCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {label}
+          </p>
           <p className="num mt-2 text-3xl font-semibold text-foreground">{value}</p>
         </div>
         <span className={cn("grid size-9 place-items-center rounded-md", tones[tone])}>

@@ -26,7 +26,12 @@ export function FindingsTable({
   columns?: Column[];
 }) {
   if (findings.length === 0) {
-    return <EmptyState title="No findings match your filters." description="Adjust the risk level, branch or status filters to see results." />;
+    return (
+      <EmptyState
+        title="No findings match your filters."
+        description="Adjust the risk level, branch or status filters to see results."
+      />
+    );
   }
 
   const has = (c: Column) => columns.includes(c);
@@ -67,7 +72,9 @@ export function FindingsTable({
                   {f.branch} · {f.branchCode}
                 </td>
               )}
-              {has("sector") && <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{f.sector}</td>}
+              {has("sector") && (
+                <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{f.sector}</td>
+              )}
               {has("risk") && (
                 <td className="px-3 py-2.5">
                   <RiskBadge risk={f.risk} />
@@ -88,14 +95,18 @@ export function FindingsTable({
                 </td>
               )}
               {has("detected") && (
-                <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{f.detected}</td>
+                <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                  {f.detected}
+                </td>
               )}
               {has("status") && (
                 <td className="px-3 py-2.5">
                   <StatusBadge status={f.status} />
                 </td>
               )}
-              {has("owner") && <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{f.owner}</td>}
+              {has("owner") && (
+                <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{f.owner}</td>
+              )}
               <td className="px-3 py-2.5 text-right">
                 <Link
                   to="/findings/$id"

@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { simulateIngestion } from "@/services/reportService";
+import { simulateIngestion, generateAnalysisFromReport } from "@/services/reportService";
 import { useAppStore } from "@/store/appStore";
 import { BRANCHES, SECTORS } from "@/data/mockData";
 import type { BankReport } from "@/lib/types";
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/reports/")({
 });
 
 function ReportsPage() {
-  const { reports, addReport, updateReport } = useAppStore();
+  const { reports, findings, addReport, updateReport, applyReportAnalysis } = useAppStore();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [dragging, setDragging] = useState(false);
@@ -53,7 +53,10 @@ function ReportsPage() {
         const q = query.trim().toLowerCase();
         const matchQ =
           !q ||
-          [r.name, r.branch, r.branchCode, r.sector, r.reportType].join(" ").toLowerCase().includes(q);
+          [r.name, r.branch, r.branchCode, r.sector, r.reportType]
+            .join(" ")
+            .toLowerCase()
+            .includes(q);
         return matchQ && (status === "all" || r.status === status);
       }),
     [reports, query, status],
@@ -62,7 +65,9 @@ function ReportsPage() {
   const startUpload = (fileName: string) => {
     const id = `r-${Date.now()}`;
     const ext = (fileName.split(".").pop() ?? "pdf").toUpperCase();
-    const fileType = (["PDF", "XLSX", "CSV", "DOCX"].includes(ext) ? ext : "PDF") as BankReport["fileType"];
+    const fileType = (
+      ["PDF", "XLSX", "CSV", "DOCX"].includes(ext) ? ext : "PDF"
+    ) as BankReport["fileType"];
     const report: BankReport = {
       id,
       name: fileName,
@@ -80,7 +85,13 @@ function ReportsPage() {
       records: 3980,
       findingIds: [],
       extracted: [
-        { label: "Outbound transaction volume", value: "INR 388.1 Cr", delta: "+162%", page: 7, anomaly: true },
+        {
+          label: "Outbound transaction volume",
+          value: "INR 388.1 Cr",
+          delta: "+162%",
+          page: 7,
+          anomaly: true,
+        },
         { label: "Reported loan disbursement", value: "INR 91.4 Cr", delta: "+28%", page: 9 },
       ],
       documentPages: [
@@ -103,7 +114,14 @@ function ReportsPage() {
     void simulateIngestion((tick) => {
       updateReport(id, { progress: tick.progress, status: tick.status });
       setUploadMessage(tick.progress === 100 ? null : tick.message);
-      if (tick.progress === 100) toast.success(`${fileName} analysed — 1 anomaly flagged.`);
+      if (tick.progress === 100) {
+        const analysis = generateAnalysisFromReport(
+          { ...report, status: "Analysis Complete", progress: 100 },
+          findings.length,
+        );
+        applyReportAnalysis(id, analysis);
+        toast.success(`${fileName} analysed — finding ${analysis.finding.ref} created.`);
+      }
     });
   };
 
@@ -152,7 +170,12 @@ function ReportsPage() {
         <CloudUpload className="size-7 text-primary" aria-hidden />
         <p className="mt-3 text-sm font-medium text-foreground">Drag &amp; drop reports here</p>
         <p className="mt-1 text-xs text-muted-foreground">or</p>
-        <Button variant="outline" size="sm" className="mt-2" onClick={() => inputRef.current?.click()}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-2"
+          onClick={() => inputRef.current?.click()}
+        >
           Browse Files
         </Button>
         <p className="mt-3 text-[11px] text-muted-foreground">
@@ -172,7 +195,10 @@ function ReportsPage() {
         actions={
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden />
+              <Search
+                className="absolute left-2.5 top-2.5 size-4 text-muted-foreground"
+                aria-hidden
+              />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -186,13 +212,19 @@ function ReportsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {["all", "Uploaded", "Parsing", "Processing", "Indexed", "Analysis Complete", "Failed"].map(
-                  (s) => (
-                    <SelectItem key={s} value={s}>
-                      {s === "all" ? "All statuses" : s}
-                    </SelectItem>
-                  ),
-                )}
+                {[
+                  "all",
+                  "Uploaded",
+                  "Parsing",
+                  "Processing",
+                  "Indexed",
+                  "Analysis Complete",
+                  "Failed",
+                ].map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s === "all" ? "All statuses" : s}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -200,19 +232,29 @@ function ReportsPage() {
         bodyClassName="p-0"
       >
         {filtered.length === 0 ? (
-          <EmptyState title="No reports match your filters." description="Try clearing the search or status filter." />
+          <EmptyState
+            title="No reports match your filters."
+            description="Try clearing the search or status filter."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  {["Report Name", "Branch", "Sector", "Type", "Period", "Uploaded", "Status", "Findings"].map(
-                    (h) => (
-                      <th key={h} className="px-3 py-2 font-medium">
-                        {h}
-                      </th>
-                    ),
-                  )}
+                  {[
+                    "Report Name",
+                    "Branch",
+                    "Sector",
+                    "Type",
+                    "Period",
+                    "Uploaded",
+                    "Status",
+                    "Findings",
+                  ].map((h) => (
+                    <th key={h} className="px-3 py-2 font-medium">
+                      {h}
+                    </th>
+                  ))}
                   <th className="px-3 py-2 text-right font-medium">Actions</th>
                 </tr>
               </thead>
@@ -220,18 +262,32 @@ function ReportsPage() {
                 {filtered.map((r) => (
                   <tr key={r.id} className="transition-colors hover:bg-muted/60">
                     <td className="px-3 py-2.5">
-                      <Link to="/reports/$id" params={{ id: r.id }} className="font-medium text-foreground hover:text-primary">
+                      <Link
+                        to="/reports/$id"
+                        params={{ id: r.id }}
+                        className="font-medium text-foreground hover:text-primary"
+                      >
                         {r.name}
                       </Link>
-                      <span className="mt-0.5 block text-xs text-muted-foreground">{r.fileType}</span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        {r.fileType}
+                      </span>
                     </td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
                       {r.branch} · {r.branchCode}
                     </td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{r.sector}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{r.reportType}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{r.period}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{r.uploadedAt}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {r.sector}
+                    </td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {r.reportType}
+                    </td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {r.period}
+                    </td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                      {r.uploadedAt}
+                    </td>
                     <td className="px-3 py-2.5">
                       <StatusBadge status={r.status} />
                       {r.progress < 100 && r.status !== "Failed" && (

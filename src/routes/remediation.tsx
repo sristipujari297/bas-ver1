@@ -52,12 +52,17 @@ function RemediationPage() {
   const filtered = useMemo(
     () =>
       remediation.filter(
-        (a) => (status === "all" || a.status === status) && (priority === "all" || a.priority === priority),
+        (a) =>
+          (status === "all" || a.status === status) &&
+          (priority === "all" || a.priority === priority),
       ),
     [remediation, status, priority],
   );
 
-  const counts = STATUSES.map((s) => ({ status: s, items: remediation.filter((a) => a.status === s) }));
+  const counts = STATUSES.map((s) => ({
+    status: s,
+    items: remediation.filter((a) => a.status === s),
+  }));
 
   return (
     <div className="space-y-5">
@@ -92,7 +97,11 @@ function RemediationPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" onClick={() => setView(view === "table" ? "board" : "table")}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setView(view === "table" ? "board" : "table")}
+            >
               {view === "table" ? "Board view" : "Table view"}
             </Button>
           </>
@@ -109,7 +118,11 @@ function RemediationPage() {
       </div>
 
       {view === "table" ? (
-        <Panel title="Action Tracker" description={`${filtered.length} actions`} bodyClassName="p-0">
+        <Panel
+          title="Action Tracker"
+          description={`${filtered.length} actions`}
+          bodyClassName="p-0"
+        >
           {filtered.length === 0 ? (
             <EmptyState title="No remediation actions match your filters." />
           ) : (
@@ -117,11 +130,13 @@ function RemediationPage() {
               <table className="w-full min-w-[900px] text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                    {["Action", "Finding", "Risk", "Owner", "Due Date", "Priority", "Status"].map((h) => (
-                      <th key={h} className="px-3 py-2 font-medium">
-                        {h}
-                      </th>
-                    ))}
+                    {["Action", "Finding", "Risk", "Owner", "Due Date", "Priority", "Status"].map(
+                      (h) => (
+                        <th key={h} className="px-3 py-2 font-medium">
+                          {h}
+                        </th>
+                      ),
+                    )}
                     <th className="px-3 py-2 text-right font-medium">Update</th>
                   </tr>
                 </thead>
@@ -141,7 +156,9 @@ function RemediationPage() {
                       <td className="px-3 py-2.5">
                         <RiskBadge risk={a.risk} />
                       </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">{a.owner}</td>
+                      <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
+                        {a.owner}
+                      </td>
                       <td
                         className={cn(
                           "num px-3 py-2.5 whitespace-nowrap",
@@ -162,7 +179,10 @@ function RemediationPage() {
                             toast.success(`Action updated to "${v}".`);
                           }}
                         >
-                          <SelectTrigger className="h-8 w-40 text-xs" aria-label={`Update status for ${a.action}`}>
+                          <SelectTrigger
+                            className="h-8 w-40 text-xs"
+                            aria-label={`Update status for ${a.action}`}
+                          >
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -184,7 +204,12 @@ function RemediationPage() {
       ) : (
         <div className="grid gap-3 lg:grid-cols-5">
           {counts.map((col) => (
-            <Panel key={col.status} title={col.status} description={`${col.items.length} actions`} bodyClassName="space-y-2 p-2.5">
+            <Panel
+              key={col.status}
+              title={col.status}
+              description={`${col.items.length} actions`}
+              bodyClassName="space-y-2 p-2.5"
+            >
               {col.items.length === 0 ? (
                 <p className="px-1 py-4 text-center text-xs text-muted-foreground">Nothing here</p>
               ) : (

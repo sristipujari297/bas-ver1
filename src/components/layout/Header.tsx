@@ -46,12 +46,21 @@ export function Header({ onMenu }: { onMenu: () => void }) {
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card px-3 sm:px-5">
-      <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenu} aria-label="Open navigation">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="lg:hidden"
+        onClick={onMenu}
+        aria-label="Open navigation"
+      >
         <Menu className="size-5" aria-hidden />
       </Button>
 
       <div className="min-w-0 flex-1">
-        <nav className="flex items-center gap-1.5 text-[11px] text-muted-foreground" aria-label="Breadcrumb">
+        <nav
+          className="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+          aria-label="Breadcrumb"
+        >
           <Link to="/" className="hover:text-foreground">
             AuditAI
           </Link>
@@ -68,7 +77,9 @@ export function Header({ onMenu }: { onMenu: () => void }) {
             <span className="text-foreground">{baseTitle}</span>
           )}
         </nav>
-        <h1 className="truncate text-sm font-semibold text-foreground">{isDetail ? baseTitle : title}</h1>
+        <h1 className="truncate text-sm font-semibold text-foreground">
+          {isDetail ? baseTitle : title}
+        </h1>
       </div>
 
       <span className="hidden items-center gap-1.5 rounded-md border border-border bg-muted px-2 py-1 text-[11px] text-muted-foreground sm:inline-flex">
@@ -77,7 +88,12 @@ export function Header({ onMenu }: { onMenu: () => void }) {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} aria-label="Search">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search"
+          >
             <Search className="size-4.5" aria-hidden />
           </Button>
         </TooltipTrigger>
@@ -86,7 +102,12 @@ export function Header({ onMenu }: { onMenu: () => void }) {
 
       <Popover onOpenChange={(o) => o && markNotificationsRead()}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative" aria-label={`Notifications (${unread} unread)`}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            aria-label={`Notifications (${unread} unread)`}
+          >
             <Bell className="size-4.5" aria-hidden />
             {unread > 0 && (
               <span className="num absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-critical text-[10px] font-semibold text-destructive-foreground">

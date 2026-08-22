@@ -57,7 +57,9 @@ function AuditIntelligence() {
           const up = d.direction === "up";
           return (
             <article key={d.label} className="panel p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{d.label}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {d.label}
+              </p>
               <p className="num mt-2 text-3xl font-semibold text-foreground">{d.score}</p>
               <p
                 className={cn(
@@ -65,7 +67,11 @@ function AuditIntelligence() {
                   up ? "text-critical" : "text-low",
                 )}
               >
-                {up ? <ArrowUpRight className="size-3.5" aria-hidden /> : <ArrowDownRight className="size-3.5" aria-hidden />}
+                {up ? (
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                ) : (
+                  <ArrowDownRight className="size-3.5" aria-hidden />
+                )}
                 {d.trend}% vs last week
               </p>
             </article>
@@ -82,11 +88,18 @@ function AuditIntelligence() {
         </Panel>
       </div>
 
-      <Panel title="Findings Trend" description="Detected vs resolved findings over the last 7 weeks">
+      <Panel
+        title="Findings Trend"
+        description="Detected vs resolved findings over the last 7 weeks"
+      >
         <FindingTrendChart />
       </Panel>
 
-      <Panel title="Sector Risk Heatmap" description="Risk intensity by branch and risk domain" bodyClassName="p-0">
+      <Panel
+        title="Branch Risk Heatmap"
+        description="Risk intensity by branch and risk domain"
+        bodyClassName="p-0"
+      >
         <div className="overflow-x-auto">
           <table className="w-full min-w-[620px] text-sm">
             <thead>
@@ -102,13 +115,20 @@ function AuditIntelligence() {
               {sectorHeatmap.map((row) => (
                 <tr key={row.branch}>
                   <td className="px-3 py-2 font-medium text-foreground">{row.branch}</td>
-                  {([row.fraud, row.compliance, row.operations, row.reporting] as number[]).map((v, i) => (
-                    <td key={i} className="px-3 py-2">
-                      <span className={cn("num inline-block w-12 rounded-md px-2 py-1 text-center text-xs font-semibold", heatColor(v))}>
-                        {v}
-                      </span>
-                    </td>
-                  ))}
+                  {([row.fraud, row.compliance, row.operations, row.reporting] as number[]).map(
+                    (v, i) => (
+                      <td key={i} className="px-3 py-2">
+                        <span
+                          className={cn(
+                            "num inline-block w-12 rounded-md px-2 py-1 text-center text-xs font-semibold",
+                            heatColor(v),
+                          )}
+                        >
+                          {v}
+                        </span>
+                      </td>
+                    ),
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -132,7 +152,9 @@ function AuditIntelligence() {
                 <Sparkles className="size-3.5" aria-hidden />
                 Analysis
               </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-foreground">{top.rootCause.potentialCause}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-foreground">
+                {top.rootCause.potentialCause}
+              </p>
             </div>
             <Link
               to="/findings/$id"

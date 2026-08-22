@@ -85,7 +85,9 @@ function ReportDetail() {
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
           <div>
             <p className="font-medium">Unable to process this report. Please retry.</p>
-            <p className="mt-0.5 text-xs">Table extraction failed on a scanned appendix (pages 11–14).</p>
+            <p className="mt-0.5 text-xs">
+              Table extraction failed on a scanned appendix (pages 11–14).
+            </p>
           </div>
         </div>
       )}
@@ -109,7 +111,10 @@ function ReportDetail() {
               </span>
             }
           />
-          <MetaItem label="Pages · records" value={`${report.pages} pages · ${report.records.toLocaleString()} records`} />
+          <MetaItem
+            label="Pages · records"
+            value={`${report.pages} pages · ${report.records.toLocaleString()} records`}
+          />
         </dl>
       </Panel>
 
@@ -124,9 +129,17 @@ function ReportDetail() {
 
         <TabsContent value="overview" className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
           <Panel title="Document Preview" bodyClassName="p-0">
-            <DocumentViewer report={report} focusPage={focusPage} onFocusPage={(p) => setFocusPage(p)} />
+            <DocumentViewer
+              report={report}
+              focusPage={focusPage}
+              onFocusPage={(p) => setFocusPage(p)}
+            />
           </Panel>
-          <Panel title="Extracted Information" description="KPIs, values and detected anomalies" bodyClassName="p-3">
+          <Panel
+            title="Extracted Information"
+            description="KPIs, values and detected anomalies"
+            bodyClassName="p-3"
+          >
             <ExtractedList report={report} onSource={openSource} />
           </Panel>
         </TabsContent>
@@ -134,7 +147,10 @@ function ReportDetail() {
         <TabsContent value="extracted" className="mt-4">
           <Panel title="Extracted Records" bodyClassName="p-0">
             {report.extracted.length === 0 ? (
-              <EmptyState title="No extracted data" description="Extraction did not complete for this report." />
+              <EmptyState
+                title="No extracted data"
+                description="Extraction did not complete for this report."
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[560px] text-sm">
@@ -152,11 +168,19 @@ function ReportDetail() {
                       <tr key={row.label} className="hover:bg-muted/60">
                         <td className="px-3 py-2.5 text-foreground">{row.label}</td>
                         <td className="num px-3 py-2.5 font-medium">{row.value}</td>
-                        <td className={cn("num px-3 py-2.5", row.anomaly ? "text-critical" : "text-muted-foreground")}>
+                        <td
+                          className={cn(
+                            "num px-3 py-2.5",
+                            row.anomaly ? "text-critical" : "text-muted-foreground",
+                          )}
+                        >
                           {row.delta ?? "—"}
                         </td>
                         <td className="px-3 py-2.5">
-                          <button onClick={() => openSource(row.page)} className="text-xs text-primary hover:underline">
+                          <button
+                            onClick={() => openSource(row.page)}
+                            className="text-xs text-primary hover:underline"
+                          >
                             Page {row.page}
                           </button>
                         </td>
@@ -179,16 +203,26 @@ function ReportDetail() {
         <TabsContent value="findings" className="mt-4">
           <Panel title="Linked Findings" bodyClassName="p-0">
             {linkedFindings.length === 0 ? (
-              <EmptyState title="No findings from this report yet." description="Analysis may still be running." />
+              <EmptyState
+                title="No findings from this report yet."
+                description="Analysis may still be running."
+              />
             ) : (
-              <FindingsTable findings={linkedFindings} columns={["finding", "branch", "risk", "score", "confidence", "status"]} />
+              <FindingsTable
+                findings={linkedFindings}
+                columns={["finding", "branch", "risk", "score", "confidence", "status"]}
+              />
             )}
           </Panel>
         </TabsContent>
 
         <TabsContent value="evidence" className="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
           <Panel title="Document Viewer" bodyClassName="p-0">
-            <DocumentViewer report={report} focusPage={focusPage} onFocusPage={(p) => setFocusPage(p)} />
+            <DocumentViewer
+              report={report}
+              focusPage={focusPage}
+              onFocusPage={(p) => setFocusPage(p)}
+            />
           </Panel>
           <Panel title="Evidence References" bodyClassName="space-y-2 p-3">
             {linkedEvidence.length === 0 ? (
@@ -231,7 +265,9 @@ function ExtractedList({
   onSource: (page: number) => void;
 }) {
   if (report.extracted.length === 0) {
-    return <EmptyState title="No extracted information" description="This report could not be parsed." />;
+    return (
+      <EmptyState title="No extracted information" description="This report could not be parsed." />
+    );
   }
   return (
     <ul className="space-y-2">
@@ -246,13 +282,21 @@ function ExtractedList({
           <div className="flex items-start justify-between gap-2">
             <p className="text-xs text-muted-foreground">{row.label}</p>
             {row.delta && (
-              <span className={cn("num text-xs font-semibold", row.anomaly ? "text-critical" : "text-muted-foreground")}>
+              <span
+                className={cn(
+                  "num text-xs font-semibold",
+                  row.anomaly ? "text-critical" : "text-muted-foreground",
+                )}
+              >
                 {row.delta}
               </span>
             )}
           </div>
           <p className="num mt-0.5 text-sm font-semibold text-foreground">{row.value}</p>
-          <button onClick={() => onSource(row.page)} className="mt-1 text-[11px] text-primary hover:underline">
+          <button
+            onClick={() => onSource(row.page)}
+            className="mt-1 text-[11px] text-primary hover:underline"
+          >
             Source: Page {row.page}
           </button>
         </li>

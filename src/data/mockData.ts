@@ -379,7 +379,8 @@ export const findings: Finding[] = [
     whyFlagged:
       "37 accounts opened in the period remain in 'pending KYC' status beyond the 30-day regulatory window.",
     rootCause: {
-      observedPattern: "Pending-KYC ageing concentrated in accounts sourced via one channel partner.",
+      observedPattern:
+        "Pending-KYC ageing concentrated in accounts sourced via one channel partner.",
       potentialCause: "Document collection backlog at the onboarding channel.",
       affectedControls: ["KYC completion SLA", "Channel partner onboarding review"],
       riskImplication: "Regulatory exposure and potential onboarding of unverified entities.",
@@ -454,7 +455,12 @@ export const findings: Finding[] = [
       affectedControls: ["Dormancy reactivation verification"],
       riskImplication: "Low — verification evidence present for all reactivations.",
     },
-    causeChain: ["Reactivation spike", "Outreach campaign", "Verification present", "No control failure"],
+    causeChain: [
+      "Reactivation spike",
+      "Outreach campaign",
+      "Verification present",
+      "No control failure",
+    ],
     evidenceIds: [],
     recommendations: ["Note campaign context in the weekly commentary."],
   },
@@ -486,8 +492,20 @@ export const reports: BankReport[] = [
         anomaly: true,
       },
       { label: "Reported loan disbursement", value: "INR 96.2 Cr", delta: "+31%", page: 9 },
-      { label: "High-value transfers (> INR 5 Cr)", value: "41", delta: "+486%", page: 12, anomaly: true },
-      { label: "Sanction letters matched", value: "168 of 183", delta: "-8%", page: 9, anomaly: true },
+      {
+        label: "High-value transfers (> INR 5 Cr)",
+        value: "41",
+        delta: "+486%",
+        page: 12,
+        anomaly: true,
+      },
+      {
+        label: "Sanction letters matched",
+        value: "168 of 183",
+        delta: "-8%",
+        page: 9,
+        anomaly: true,
+      },
       { label: "Reconciliation exceptions", value: "26", delta: "+4%", page: 14 },
       { label: "Customer complaints", value: "12", delta: "-18%", page: 19 },
     ],
@@ -552,7 +570,13 @@ export const reports: BankReport[] = [
     findingIds: [],
     extracted: [
       { label: "Disbursement records", value: "183", page: 1 },
-      { label: "Records without sanction reference", value: "15", delta: "+15", page: 3, anomaly: true },
+      {
+        label: "Records without sanction reference",
+        value: "15",
+        delta: "+15",
+        page: 3,
+        anomaly: true,
+      },
       { label: "Average processing time", value: "2.4 days", delta: "-6%", page: 4 },
     ],
     documentPages: [
@@ -587,7 +611,13 @@ export const reports: BankReport[] = [
     records: 8420,
     findingIds: ["f-002"],
     extracted: [
-      { label: "Open reconciliation exceptions", value: "1,284", delta: "+2%", page: 4, anomaly: true },
+      {
+        label: "Open reconciliation exceptions",
+        value: "1,284",
+        delta: "+2%",
+        page: 4,
+        anomaly: true,
+      },
       { label: "Exception ageing", value: "6 days", delta: "SLA 2 days", page: 4, anomaly: true },
       { label: "Branch transaction count", value: "62,481", delta: "+3%", page: 2 },
     ],

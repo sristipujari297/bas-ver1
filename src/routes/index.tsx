@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { PageHeader, Panel } from "@/components/audit/SectionHeader";
@@ -15,9 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { dashboardInsight, kpis } from "@/services/auditService";
+import { dashboardInsight } from "@/services/auditService";
 import { BRANCHES, SECTORS } from "@/data/mockData";
 import { useAppStore } from "@/store/appStore";
+import {
+  computeFilteredRiskTrend,
+  computeKpis,
+  filterFindings,
+  filterReports,
+  isActiveFinding,
+  type DateRangeKey,
+} from "@/lib/dashboardUtils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,19 +47,42 @@ export const Route = createFileRoute("/")({
 });
 
 function Overview() {
-  const { findings } = useAppStore();
+  const { findings, reports } = useAppStore();
   const [metric, setMetric] = useState<RiskMetric>("count");
-  const [range, setRange] = useState("this-week");
+  const [range, setRange] = useState<DateRangeKey>("this-week");
   const [branch, setBranch] = useState("all");
   const [sector, setSector] = useState("all");
 
-  const filtered = findings.filter(
-    (f) => (branch === "all" || f.branchCode === branch) && (sector === "all" || f.sector === sector),
+  const filterOpts = { branch, sector, range };
+
+  const filteredFindings = useMemo(
+    () => filterFindings(findings, filterOpts),
+    [findings, branch, sector, range],
   );
-  const alerts = [...findings]
-    .sort((a, b) => b.score - a.score)
-    .filter((f) => f.risk === "Critical" || f.risk === "High")
-    .slice(0, 4);
+  const filteredReports = useMemo(
+    () => filterReports(reports, filterOpts),
+    [reports, branch, sector, range],
+  );
+
+  const kpis = useMemo(
+    () => computeKpis(filteredReports, filteredFindings),
+    [filteredReports, filteredFindings],
+  );
+
+  const riskTrendData = useMemo(
+    () => computeFilteredRiskTrend(filteredFindings),
+    [filteredFindings],
+  );
+
+  const alerts = useMemo(
+    () =>
+      [...filteredFindings]
+        .filter(isActiveFinding)
+        .sort((a, b) => b.score - a.score)
+        .filter((f) => f.risk === "Critical" || f.risk === "High")
+        .slice(0, 4),
+    [filteredFindings],
+  );
 
   return (
     <div className="space-y-5">
@@ -60,7 +91,7 @@ function Overview() {
         subtitle="Weekly audit intelligence and risk overview"
         actions={
           <>
-            <Select value={range} onValueChange={setRange}>
+            <Select value={range} onValueChange={(v) => setRange(v as DateRangeKey)}>
               <SelectTrigger className="w-40" aria-label="Date range">
                 <SelectValue />
               </SelectTrigger>
@@ -126,7 +157,7 @@ function Overview() {
           }
         >
           <div className="grid gap-4 lg:grid-cols-[1fr_15rem]">
-            <RiskTrendChart metric={metric} />
+            <RiskTrendChart metric={metric} data={riskTrendData} />
             <aside className="rounded-lg border border-primary/25 bg-accent/60 p-3">
               <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-accent-foreground">
                 <Sparkles className="size-3.5" aria-hidden />
@@ -144,29 +175,39 @@ function Overview() {
           </div>
         </Panel>
 
-        <Panel title="Critical Alerts" description="Highest scoring open findings" bodyClassName="space-y-2 p-3">
-          {alerts.map((f) => (
-            <Link
-              key={f.id}
-              to="/findings/$id"
-              params={{ id: f.id }}
-              className="block rounded-lg border border-border bg-card p-3 transition-shadow hover:shadow-raised"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-medium text-foreground">{f.title}</p>
-                <RiskBadge risk={f.risk} />
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Branch {f.branchCode} · {f.sector}
-              </p>
-              <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="num">
-                  Score <span className="font-semibold text-foreground">{f.score}/100</span>
-                </span>
-                <span>Detected {f.detected}</span>
-              </div>
-            </Link>
-          ))}
+        <Panel
+          title="Critical Alerts"
+          description="Highest scoring open findings"
+          bodyClassName="space-y-2 p-3"
+        >
+          {alerts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No critical or high alerts match the current filters.
+            </p>
+          ) : (
+            alerts.map((f) => (
+              <Link
+                key={f.id}
+                to="/findings/$id"
+                params={{ id: f.id }}
+                className="block rounded-lg border border-border bg-card p-3 transition-shadow hover:shadow-raised"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-medium text-foreground">{f.title}</p>
+                  <RiskBadge risk={f.risk} />
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Branch {f.branchCode} · {f.sector}
+                </p>
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="num">
+                    Score <span className="font-semibold text-foreground">{f.score}/100</span>
+                  </span>
+                  <span>Detected {f.detected}</span>
+                </div>
+              </Link>
+            ))
+          )}
         </Panel>
       </div>
 
@@ -182,7 +223,7 @@ function Overview() {
         <Panel
           className="xl:col-span-2"
           title="Recent AI Findings"
-          description={`${filtered.length} findings match the current filters`}
+          description={`${filteredFindings.length} findings match the current filters`}
           actions={
             <Button asChild variant="outline" size="sm" className="h-8 text-xs">
               <Link to="/findings">View all</Link>
@@ -190,7 +231,7 @@ function Overview() {
           }
           bodyClassName="p-0"
         >
-          <FindingsTable findings={filtered} />
+          <FindingsTable findings={filteredFindings} />
         </Panel>
       </div>
     </div>

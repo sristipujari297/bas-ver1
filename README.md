@@ -102,19 +102,17 @@ Create a clean service/API layer such as:
 /services/reportService.ts
 /services/aiService.ts
 
-
 The frontend should be structured so mock functions can later be replaced by:
 
 Frontend
-   ↓
+↓
 FastAPI / API layer
-   ↓
+↓
 n8n orchestration
-   ↓
+↓
 RAG + PostgreSQL/pgvector
-   ↓
+↓
 Local LLM / Ollama
-
 
 Do not hard-code AI responses directly inside individual UI components.
 
@@ -245,14 +243,13 @@ Create a persistent enterprise dashboard layout.
 Desktop:
 
 ┌─────────────────────────────────────────────────────────────┐
-│ Top Header                                                  │
+│ Top Header │
 ├───────────────┬─────────────────────────────────────────────┤
-│               │                                             │
-│   Sidebar     │              Main Content                   │
-│               │                                             │
-│               │                                             │
+│ │ │
+│ Sidebar │ Main Content │
+│ │ │
+│ │ │
 └───────────────┴─────────────────────────────────────────────┘
-
 
 Sidebar
 
@@ -479,15 +476,14 @@ Create a visual workflow component:
 Current Audit Pipeline
 
 ✓ Report Ingestion
-        ↓
+↓
 ✓ Evidence Retrieval
-        ↓
+↓
 ✓ Audit Analysis
-        ↓
+↓
 ⚠ Root Cause Identified
-        ↓
+↓
 ● Remediation Pending
-
 
 Use subtle animated progress/status indicators.
 
@@ -559,7 +555,7 @@ Upload, monitor and analyze incoming audit reports.
 
 Top-right:
 
-+ Upload Report
+- Upload Report
 
 Create drag-and-drop upload area.
 
@@ -754,15 +750,14 @@ Why did Branch 042's risk score increase?
 Show:
 
 Risk Score Increase
-        ↓
+↓
 Transaction volume anomaly
-        ↓
+↓
 High-value transfers increased
-        ↓
+↓
 Mismatch with reported loan activity
-        ↓
+↓
 Possible reporting/control failure
-
 
 Use connected cards/nodes rather than a complicated graph.
 
@@ -985,16 +980,15 @@ Evidence Relationships
 Example:
 
 Finding #004
-      │
-      ├── Branch_042_Report.pdf
-      │       └── Page 7
-      │
-      ├── Loan_Disbursement.xlsx
-      │       └── Rows 182–196
-      │
-      └── Transaction_Report.pdf
-              └── Page 12
-
+│
+├── Branch_042_Report.pdf
+│ └── Page 7
+│
+├── Loan_Disbursement.xlsx
+│ └── Rows 182–196
+│
+└── Transaction_Report.pdf
+└── Page 12
 
 This visually demonstrates the evidence-traceability concept.
 
@@ -1069,17 +1063,16 @@ Ask questions across your bank's audit data and get evidence-backed answers.
 Layout:
 
 ┌───────────────────────────────┬───────────────────────────┐
-│                               │                           │
-│        Conversation           │        Evidence           │
-│                               │                           │
-│                               │                           │
-│                               │                           │
-│                               │                           │
-│                               │                           │
-│                               │                           │
-│ [Ask about audit data...]     │                           │
+│ │ │
+│ Conversation │ Evidence │
+│ │ │
+│ │ │
+│ │ │
+│ │ │
+│ │ │
+│ │ │
+│ [Ask about audit data...] │ │
 └───────────────────────────────┴───────────────────────────┘
-
 
 27. CHAT INTERFACE
 
@@ -1188,14 +1181,13 @@ Create an AI service abstraction.
 For example:
 
 interface AIResponse {
-  answer: string;
-  riskScore?: number;
-  confidence?: number;
-  findings?: Finding[];
-  evidence?: Evidence[];
-  recommendations?: string[];
+answer: string;
+riskScore?: number;
+confidence?: number;
+findings?: Finding[];
+evidence?: Evidence[];
+recommendations?: string[];
 }
-
 
 Create a mock AI implementation.
 
@@ -1375,7 +1367,6 @@ FINDINGS
 
 EVIDENCE
 Loan_Disbursement_Aug.xlsx
-
 
 35. NOTIFICATIONS
 
@@ -1615,11 +1606,10 @@ Horizontal bar chart.
 
 Example:
 
-Branch 042     ██████████████████ 92
-Branch 017     ███████████████    81
-Branch 008     ███████████        67
-Branch 031     ███████            48
-
+Branch 042 ██████████████████ 92
+Branch 017 ███████████████ 81
+Branch 008 ███████████ 67
+Branch 031 ███████ 48
 
 Also include:
 
@@ -1788,17 +1778,16 @@ Avoid duplicating UI code.
 Create routes/pages for:
 
 /
- /reports
- /reports/:id
- /audit-intelligence
- /findings
- /findings/:id
- /evidence
- /remediation
- /assistant
- /logs
- /settings
-
+/reports
+/reports/:id
+/audit-intelligence
+/findings
+/findings/:id
+/evidence
+/remediation
+/assistant
+/logs
+/settings
 
 The Overview page should be /.
 

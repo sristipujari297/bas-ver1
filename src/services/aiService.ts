@@ -48,7 +48,8 @@ const library: { match: RegExp; build: () => AIResponse }[] = [
   {
     match: /critical findings|critical risks/i,
     build: () => ({
-      summary: "4 critical-tier risks are open this week; 1 finding is at critical severity and unassigned.",
+      summary:
+        "4 critical-tier risks are open this week; 1 finding is at critical severity and unassigned.",
       answer: "Critical findings for the current reporting week.",
       keyFindings: [
         "#004 Unusual Loan Disbursement Pattern — Andheri East · 92/100 · unassigned.",
@@ -126,7 +127,8 @@ const library: { match: RegExp; build: () => AIResponse }[] = [
   {
     match: /evidence.*(004|#4)|support.*finding/i,
     build: () => ({
-      summary: "Finding #004 is supported by three indexed evidence references across two branches' documents.",
+      summary:
+        "Finding #004 is supported by three indexed evidence references across two branches' documents.",
       answer: "Evidence trace for Finding #004.",
       keyFindings: [
         "Branch_042_Weekly_Report.pdf · Page 7 — transaction volume +184%.",
@@ -144,7 +146,8 @@ const library: { match: RegExp; build: () => AIResponse }[] = [
   {
     match: /remediation|immediate|overdue|action/i,
     build: () => ({
-      summary: "Three remediation actions need attention now: one overdue and two P1 actions not started.",
+      summary:
+        "Three remediation actions need attention now: one overdue and two P1 actions not started.",
       answer: "Remediation priorities as of today.",
       keyFindings: [
         "Overdue: revoke override entitlements for 4 privileged accounts (Finding #003).",
