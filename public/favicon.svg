@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="auditTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#115e59"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded badge background matching sidebar -->
+  <rect width="32" height="32" rx="7" fill="url(#auditTeal)"/>
+  
+  <!-- Lucide Shield shape -->
+  <path d="M25.33 17.33C25.33 24 20.67 27.33 16 29C11.33 27.33 6.67 24 6.67 17.33V8C6.67 7.26 7.26 6.67 8 6.67C10.67 6.67 14 5.07 15.65 3.37C15.85 3.16 16.15 3.16 16.35 3.37C18 5.07 21.33 6.67 24 6.67C24.74 6.67 25.33 7.26 25.33 8V17.33Z" 
+        fill="#ffffff"/>
+  
+  <!-- Lucide Checkmark inside shield -->
+  <path d="M12 16L14.67 18.67L20 13.33" 
+        fill="none" 
+        stroke="#0f766e" 
+        stroke-width="2.4" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+</svg>
