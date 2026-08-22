@@ -19,7 +19,7 @@ export const Route = createFileRoute("/audit-intelligence")({
       {
         name: "description",
         content:
-          "Risk analytics across branches and sectors: severity distribution, branch comparison, sector heatmap and root-cause chains for recurring anomalies.",
+          "Risk analytics across branches and sectors: severity distribution, branch comparison, branch risk heatmap and root-cause chains for recurring anomalies.",
       },
       { property: "og:title", content: "Audit Intelligence — AuditAI" },
       {
