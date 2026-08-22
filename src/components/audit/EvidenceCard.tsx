@@ -45,12 +45,14 @@ export function EvidenceCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p
-                className="truncate text-sm font-medium text-foreground"
+              <button
+                type="button"
+                onClick={() => handleView(evidence)}
+                className="text-left font-medium text-foreground transition-colors hover:text-primary focus:underline focus:outline-none"
                 title={evidence.documentName}
               >
-                {evidence.documentName}
-              </p>
+                <span className="block truncate text-sm">{evidence.documentName}</span>
+              </button>
               <p className="mt-0.5 text-xs text-muted-foreground">{evidence.locator}</p>
             </div>
             {evidence.page && (

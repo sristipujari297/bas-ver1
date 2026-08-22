@@ -41,23 +41,7 @@ export function resolveEvidenceTarget(
     };
   }
 
-  // 2. Finding linkage match
-  if (evidence.findingIds && evidence.findingIds.length > 0) {
-    const byFinding = reports.find((r) =>
-      r.findingIds.some((fid) => evidence.findingIds.includes(fid)),
-    );
-    if (byFinding) {
-      return {
-        type: "report",
-        reportId: byFinding.id,
-        page: evidence.page ?? byFinding.documentPages[0]?.page ?? 1,
-        tab: "evidence",
-        highlight: evidence.id,
-      };
-    }
-  }
-
-  // 3. Exact normalized name match
+  // 2. Exact normalized document name match
   const byExactName = reports.find(
     (r) => normalizeDocName(r.name) === normalizeDocName(evidence.documentName),
   );
@@ -71,7 +55,7 @@ export function resolveEvidenceTarget(
     };
   }
 
-  // 4. Partial name match
+  // 3. Partial name stem match
   const stem = normalizeDocName(evidence.documentName).slice(0, 12);
   const byPartial = reports.find(
     (r) =>
@@ -88,17 +72,67 @@ export function resolveEvidenceTarget(
     };
   }
 
-  // 5. Document metadata match
+  // 4. Document library metadata match
   const doc = documents.find((d) => d.id === evidence.documentId);
   if (doc) {
+    // 4a. Check if report matches document library name
+    const byDocName = reports.find((r) => normalizeDocName(r.name) === normalizeDocName(doc.name));
+    if (byDocName) {
+      return {
+        type: "report",
+        reportId: byDocName.id,
+        page: evidence.page ?? byDocName.documentPages[0]?.page ?? 1,
+        tab: "evidence",
+        highlight: evidence.id,
+      };
+    }
+
+    // 4b. Check if report matches branch code and file type
     const byBranch = reports.find(
       (r) => doc.branch.includes(r.branchCode) && r.fileType === evidence.fileType,
     );
     if (byBranch) {
+      // If evidence page is not directly specified, find page in report or default to relevant sheet page
+      const targetPage =
+        evidence.page ??
+        byBranch.documentPages.find((p) => p.highlight)?.page ??
+        byBranch.documentPages[0]?.page ??
+        1;
       return {
         type: "report",
         reportId: byBranch.id,
-        page: evidence.page ?? byBranch.documentPages[0]?.page ?? 1,
+        page: targetPage,
+        tab: "evidence",
+        highlight: evidence.id,
+      };
+    }
+  }
+
+  // 5. Finding linkage match with matching file type
+  if (evidence.findingIds && evidence.findingIds.length > 0) {
+    const byFindingAndType = reports.find(
+      (r) =>
+        r.fileType === evidence.fileType &&
+        r.findingIds.some((fid) => evidence.findingIds.includes(fid)),
+    );
+    if (byFindingAndType) {
+      return {
+        type: "report",
+        reportId: byFindingAndType.id,
+        page: evidence.page ?? byFindingAndType.documentPages[0]?.page ?? 1,
+        tab: "evidence",
+        highlight: evidence.id,
+      };
+    }
+
+    const byFinding = reports.find((r) =>
+      r.findingIds.some((fid) => evidence.findingIds.includes(fid)),
+    );
+    if (byFinding) {
+      return {
+        type: "report",
+        reportId: byFinding.id,
+        page: evidence.page ?? byFinding.documentPages[0]?.page ?? 1,
         tab: "evidence",
         highlight: evidence.id,
       };

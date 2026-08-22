@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Bot, SendHorizonal, Sparkles, User } from "lucide-react";
+import { Bot, ExternalLink, FileText, SendHorizonal, Sparkles, User } from "lucide-react";
 import { PageHeader, Panel, EmptyState, LoadingState } from "@/components/audit/SectionHeader";
 import { RiskBadge } from "@/components/audit/RiskBadge";
 import { ConfidenceIndicator } from "@/components/audit/ConfidenceIndicator";
@@ -8,6 +8,7 @@ import { EvidenceCard } from "@/components/audit/EvidenceCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { askAudit, suggestedQuestions } from "@/services/aiService";
+import { useEvidenceNavigation } from "@/hooks/useEvidenceNavigation";
 import { useAppStore } from "@/store/appStore";
 import type { AIResponse, RiskLevel } from "@/lib/types";
 
@@ -149,7 +150,9 @@ function AssistantPage() {
 }
 
 function AnswerCard({ response }: { response: AIResponse }) {
-  const { findings } = useAppStore();
+  const { findings, evidence } = useAppStore();
+  const { openEvidence } = useEvidenceNavigation();
+
   return (
     <div className="max-w-[85%] space-y-2.5 rounded-lg rounded-bl-sm border border-border bg-card p-3">
       <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent-foreground">
@@ -176,8 +179,42 @@ function AnswerCard({ response }: { response: AIResponse }) {
           <ConfidenceIndicator value={response.confidence} compact />
         )}
       </div>
+
+      {response.evidenceIds && response.evidenceIds.length > 0 && (
+        <div className="border-t border-border pt-2.5">
+          <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            <FileText className="size-3 text-primary" aria-hidden />
+            Cited Evidence Sources ({response.evidenceIds.length})
+          </p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {response.evidenceIds.map((id) => {
+              const e = evidence.find((x) => x.id === id);
+              if (!e) return null;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => openEvidence(e)}
+                  className="group inline-flex items-center gap-1.5 rounded-md border border-primary/25 bg-accent/60 px-2 py-1 text-left text-xs font-medium text-accent-foreground transition-colors hover:border-primary hover:bg-accent"
+                  title={`Open source: ${e.documentName} · ${e.locator}`}
+                >
+                  <span className="max-w-[150px] truncate">{e.documentName}</span>
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground">
+                    ({e.locator.split("·")[0]?.trim() || e.locator})
+                  </span>
+                  <ExternalLink
+                    className="size-3 text-muted-foreground group-hover:text-foreground"
+                    aria-hidden
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {response.recommendations && response.recommendations.length > 0 && (
-        <div>
+        <div className="border-t border-border pt-2.5">
           <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             Recommended next steps
           </p>
@@ -189,7 +226,7 @@ function AnswerCard({ response }: { response: AIResponse }) {
         </div>
       )}
       {response.findingIds && response.findingIds.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 border-t border-border pt-2.5">
           {response.findingIds.map((id) => {
             const f = findings.find((x) => x.id === id);
             if (!f) return null;
