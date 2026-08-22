@@ -412,6 +412,32 @@ export function generateRemediationFromFinding(finding: Finding): RemediationAct
   };
 }
 
+/** Generate a dynamic notification from a newly created finding and report. */
+export function generateNotificationFromFinding(
+  report: BankReport,
+  finding: Finding,
+): AppNotification {
+  const ts = Date.now();
+  const title =
+    finding.risk === "Critical"
+      ? "Critical finding detected"
+      : finding.risk === "High"
+        ? "High risk finding detected"
+        : `${finding.risk} risk finding detected`;
+
+  const context = `Branch ${report.branchCode} · ${report.sector} · Finding ${finding.ref}`;
+
+  return {
+    id: `n-${ts}`,
+    title,
+    context,
+    time: "Just now",
+    severity: finding.risk,
+    href: `/findings/${finding.id}`,
+    read: false,
+  };
+}
+
 export interface ReportAnalysisResult {
   finding: Finding;
   evidenceRefs: EvidenceRef[];
@@ -430,16 +456,7 @@ export function generateAnalysisFromReport(
   const finding = generateFindingFromReport(report, existingFindingCount);
   const { evidence, document } = generateEvidenceFromReport(report, finding);
   const remediation = generateRemediationFromFinding(finding);
-
-  const notification: AppNotification = {
-    id: `n-${ts}`,
-    title: `${finding.risk} finding detected`,
-    context: `Branch ${report.branchCode} · ${report.sector}`,
-    time: "Just now",
-    severity: finding.risk,
-    href: `/findings/${finding.id}`,
-    read: false,
-  };
+  const notification = generateNotificationFromFinding(report, finding);
 
   const now =
     "22 Aug · " +

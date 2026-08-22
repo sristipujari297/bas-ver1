@@ -18,6 +18,7 @@ import {
   generateFindingFromReport,
   generateEvidenceFromReport,
   generateRemediationFromFinding,
+  generateNotificationFromFinding,
 } from "@/services/reportService";
 import { useAppStore } from "@/store/appStore";
 import { BRANCHES, SECTORS } from "@/data/mockData";
@@ -54,6 +55,7 @@ function ReportsPage() {
     addEvidence,
     addDocument,
     addRemediation,
+    addNotification,
   } = useAppStore();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -137,11 +139,13 @@ function ReportsPage() {
         finding.evidenceIds = [evidence.id];
 
         const remediationAction = generateRemediationFromFinding(finding);
+        const notification = generateNotificationFromFinding(report, finding);
 
         addFinding(finding);
         addEvidence(evidence);
         addDocument(document);
         addRemediation(remediationAction);
+        addNotification(notification);
 
         updateReport(id, {
           status: "Analysis Complete",
@@ -150,9 +154,7 @@ function ReportsPage() {
           aiSummary: finding.whyFlagged,
           aiConfidence: finding.confidence,
         });
-        toast.success(
-          `${fileName} processed — finding ${finding.ref} and remediation action created.`,
-        );
+        toast.success(`${fileName} processed — finding ${finding.ref} created.`);
       }
     });
   };
