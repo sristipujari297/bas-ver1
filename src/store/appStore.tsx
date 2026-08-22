@@ -85,13 +85,17 @@ export interface AppState {
 const AppContext = createContext<AppState | null>(null);
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
-  const [findings, setFindings] = useState<Finding[]>(seedFindings);
-  const [reports, setReports] = useState<BankReport[]>(seedReports);
-  const [remediation, setRemediation] = useState<RemediationAction[]>(seedRemediation);
-  const [notifications, setNotifications] = useState<AppNotification[]>(seedNotifications);
-  const [logs, setLogs] = useState<AuditLogEntry[]>(seedLogs);
-  const [evidence, setEvidence] = useState<EvidenceRef[]>(seedEvidence);
-  const [documents, setDocuments] = useState<EvidenceDocument[]>(seedDocs);
+  const [findings, setFindings] = useState<Finding[]>(() => structuredClone(seedFindings));
+  const [reports, setReports] = useState<BankReport[]>(() => structuredClone(seedReports));
+  const [remediation, setRemediation] = useState<RemediationAction[]>(() =>
+    structuredClone(seedRemediation),
+  );
+  const [notifications, setNotifications] = useState<AppNotification[]>(() =>
+    structuredClone(seedNotifications),
+  );
+  const [logs, setLogs] = useState<AuditLogEntry[]>(() => structuredClone(seedLogs));
+  const [evidence, setEvidence] = useState<EvidenceRef[]>(() => structuredClone(seedEvidence));
+  const [documents, setDocuments] = useState<EvidenceDocument[]>(() => structuredClone(seedDocs));
   const [chat, setChatState] = useState<ChatMessage[]>([]);
 
   // Finding actions
@@ -291,13 +295,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   // Demo Reset
   const resetDemo = useCallback(() => {
-    setFindings(seedFindings);
-    setReports(seedReports);
-    setRemediation(seedRemediation);
-    setNotifications(seedNotifications);
-    setLogs(seedLogs);
-    setEvidence(seedEvidence);
-    setDocuments(seedDocs);
+    setFindings(structuredClone(seedFindings));
+    setReports(structuredClone(seedReports));
+    setRemediation(structuredClone(seedRemediation));
+    setNotifications(structuredClone(seedNotifications));
+    setLogs(structuredClone(seedLogs));
+    setEvidence(structuredClone(seedEvidence));
+    setDocuments(structuredClone(seedDocs));
     setChatState([]);
   }, []);
 
